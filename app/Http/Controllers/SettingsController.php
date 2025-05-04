@@ -16,8 +16,8 @@ class SettingsController extends Controller
     public function index(Request $request)
     {
         $settings = GeneralSettings::first();
-        if($request->query('token')){
-            $accessToken = PersonalAccessToken::findToken($request->query('token'));
+        if($request->header('token')){
+            $accessToken = PersonalAccessToken::findToken($request->header('token'));
             $user = $accessToken->tokenable;
             $settings->permissions =  json_decode($user->permission);
         }

@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             'blood' => 'O+',
             'gender' => 'male',
             'status' => true,
-            'permission' => null, // JSON permissions
+            'permission' => json_encode(["2"=> 0, "3"=> 1]), // JSON permissions
         ]);
 
         $faker = Faker::create();
