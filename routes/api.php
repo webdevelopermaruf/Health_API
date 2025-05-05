@@ -7,7 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::resource('department', DepartmentController::class);
+    Route::get('/departments', [DepartmentController::class, 'index']);
+    Route::post('/add/department', [DepartmentController::class, 'store']);
+    Route::post('/edit/department/{id}', [DepartmentController::class, 'update']);
+    Route::post('/delete/department/{id}', [DepartmentController::class, 'destroy']);
 });
 
 Route::get('/settings', [SettingsController::class, 'index']);
