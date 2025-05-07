@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Auth;
 use App\Models\GeneralSettings;
+use App\Models\PaymentMethods;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Faker\Factory as Faker;
@@ -23,19 +24,18 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@admin.com',
             'phone' => '1234567890',
             'password' => bcrypt('admin'), // Hash the password
-            'role' => 1,
             'department_id' => 2, // Assuming department ID exists (e.g., nurse)
             'address' => '123 Main St, City, Country',
             'dob' => '1990-05-15',
             'blood' => 'O+',
-            'gender' => 'male',
-            'status' => true,
+            'gender' => 1,
+            'status' => 1,
             'permission' => json_encode(["2"=> 0, "3"=> 1]), // JSON permissions
         ]);
 
         $faker = Faker::create();
         GeneralSettings::insert([
-            "user_code" => "demo",
+            "user_code" => "PHS",
             "name" => json_encode(["en"=> "Prime Hospital", "bn"=> "প্রাইম হসপিটাল"], JSON_UNESCAPED_UNICODE),
             "icon" => json_encode(["icon"=> ""]),
             "sms_api" => json_encode(["balance"=> 0, "rate"=> 0.35, "apikey"=> "8XYpeBwf0JMssLw3Cyxf"]),
@@ -45,6 +45,13 @@ class DatabaseSeeder extends Seeder
             "payroll_rules" => json_encode([]),
         ]);
 
+        // departments
+        $this->call([
+            DepartmentSeeder::class,
+            DoctorSeeder::class,
+            StaffSeeder::class,
+            PayrollSeeder::class,
+        ]);
 
     }
 }

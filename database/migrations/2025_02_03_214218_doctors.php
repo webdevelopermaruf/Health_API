@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->foreignId('department_id');
-            $table->string('designation')->nullable();
             $table->string('specialization')->nullable();
             $table->string('license_number')->nullable();
             $table->text('qualification')->nullable(); // education
             $table->text('experience')->nullable();
-            $table->text('availability'); // [[start_time  - end_time], ...]
-            $table->boolean('status')->default(true);
+            $table->text('about')->nullable();
+            $table->text('availability')->nullable();
+            $table->boolean('status')->default(1);
             $table->timestamps();
         });
     }

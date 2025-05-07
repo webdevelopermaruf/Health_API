@@ -24,13 +24,14 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->unique();
             $table->string('password')->nullable();
-            $table->foreignId('role');
+            $table->string('designation')->nullable();
             $table->foreignId('department_id')->nullable(); // doctors, nurse, receptionist, lab, accountant
             $table->text('address')->nullable();
             $table->date('dob')->nullable();
             $table->string('blood')->nullable();
-            $table->enum('gender', ['male', 'female'])->nullable();
-            $table->boolean('status')->default(true);
+            $table->string('picture')->nullable();
+            $table->tinyInteger('gender')->default(0);
+            $table->tinyInteger('status')->default(1);
             $table->json('permission')->nullable();
             $table->rememberToken();
             $table->timestamps();

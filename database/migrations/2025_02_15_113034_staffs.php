@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('staffs', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
             $table->foreignId('user_id');
             $table->foreignId('department_id');
-            $table->string('designation')->nullable();
-            $table->text('address')->nullable();
+            $table->foreignId('salary_structure_id');
             $table->timestamps();
         });
     }

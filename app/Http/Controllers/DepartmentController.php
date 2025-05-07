@@ -25,6 +25,15 @@ class DepartmentController extends Controller
         ]);
     }
 
+    public function show(string $id)
+    {
+        return response()->json([
+            'data'=> Departments::where('id', $id)->with('parentDepartment')->first(),
+            'msg' => 'success',
+            'status'=> 200
+        ]);
+    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -38,15 +47,15 @@ class DepartmentController extends Controller
                 'parent_dept' => 'nullable|exists:departments,id',
             ]);
             $insert = Departments::insert([
-                "name" => $validator->input("name"),
-                "description" => $validator->input("description"),
-                "parent_dept" => $validator->input("parent_dept") ?? null,
-                "status" => $validator->input("status") ?? 1
+                "name" => $request->input("name"),
+                "description" => $request->input("description"),
+                "parent_dept" => $request->input("parent_dept") ?? null,
+                "status" => $request->input("status") ?? 1
             ]);
             return response()->json([
                 'data' => $insert,
                 'msg' => 'success',
-                'status' => 200
+                'status' => 201
             ]);
         }catch(ValidationException  $e){
             return response()->json(['data'=> $e->errors(), 'msg' => 'error' , 'status'=> 422]);
@@ -66,10 +75,10 @@ class DepartmentController extends Controller
                 'parent_dept' => 'nullable|exists:departments,id',
             ]);
             $update = Departments::where('id', $id)->update([
-                "name" => $validator->input("name"),
-                "description" => $validator->input("description"),
-                "parent_dept" => $validator->input("parent_dept"),
-                "status" => $validator->input("status") ?? 1
+                "name" => $request->input("name"),
+                "description" => $request->input("description"),
+                "parent_dept" => $request->input("parent_dept"),
+                "status" => $request->input("status") ?? 1
             ]);
             return response()->json([
                 'data' => $update,
