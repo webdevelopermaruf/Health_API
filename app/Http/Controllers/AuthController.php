@@ -52,18 +52,18 @@ class AuthController extends Controller
             $token = $user->createToken('auth')->plainTextToken;
             $user->token = $token;
             $settings = GeneralSettings::findOrFail(1);
-            $response = Http::post(json_decode($settings->attendance)->server . '/jwt-api-token-auth/', [
-                "username" => json_decode($settings->attendance)->username,
-                "password" => json_decode($settings->attendance)->password,
-            ]);
-            if ($response->successful()) {
-                $user->attendance = $response->json();
-                $newAttendance = json_decode($settings->attendance);
-                $newAttendance->remember = $response->json()['token'];
-                GeneralSettings::where('id', 1)->update(['attendance'=> json_encode($newAttendance)]);
-            }else {
-                $user->attendance = "Something went wrong";
-            }
+//            $response = Http::post(json_decode($settings->attendance)->server . '/jwt-api-token-auth/', [
+//                "username" => json_decode($settings->attendance)->username,
+//                "password" => json_decode($settings->attendance)->password,
+//            ]);
+//            if ($response->successful()) {
+//                $user->attendance = $response->json();
+//                $newAttendance = json_decode($settings->attendance);
+//                $newAttendance->remember = $response->json()['token'];
+//                GeneralSettings::where('id', 1)->update(['attendance'=> json_encode($newAttendance)]);
+//            }else {
+//                $user->attendance = "Something went wrong";
+//            }
             return response()->json(['data'=> $user, 'msg' => 'success' , 'status'=> 200])->cookie('access_token', $token, 60, null, null, true, true);
         }
         catch (\Exception $e){
