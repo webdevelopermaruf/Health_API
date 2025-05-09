@@ -21,7 +21,7 @@ return new class extends Migration
             $table->text('experience')->nullable();
             $table->text('about')->nullable();
             $table->text('availability')->nullable();
-            $table->boolean('status')->default(1);
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }

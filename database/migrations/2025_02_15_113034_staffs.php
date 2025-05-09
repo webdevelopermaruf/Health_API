@@ -16,6 +16,10 @@ return new class extends Migration
             $table->foreignId('user_id');
             $table->foreignId('department_id');
             $table->foreignId('salary_structure_id');
+            $table->string('qualification')->nullable();
+            $table->string('experience')->nullable();
+            $table->string('about')->nullable();
+            $table->tinyInteger('status');
             $table->timestamps();
         });
     }

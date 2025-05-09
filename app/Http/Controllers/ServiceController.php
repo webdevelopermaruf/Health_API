@@ -3,23 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Departments;
+use App\Models\Services;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class DepartmentController extends Controller
+class ServiceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $departments = Departments::whereNotIn('status', [-1])
-            ->with('parentDepartment')
-            ->get();
-
+        $services = Services::whereNotIn('status', [-1])->get();
         return response()->json([
-            'data'=> $departments,
+            'data'=> $services,
             'msg' => 'success',
             'status'=> 200
         ]);
@@ -28,12 +23,11 @@ class DepartmentController extends Controller
     public function show(string $id)
     {
         return response()->json([
-            'data'=> Departments::where('id', $id)->with('parentDepartment')->first(),
+            'data'=> Services::where('id', $id)->first(),
             'msg' => 'success',
             'status'=> 200
         ]);
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -46,7 +40,7 @@ class DepartmentController extends Controller
                 'description' => 'nullable|string',
                 'parent_dept' => 'nullable|exists:departments,id',
             ]);
-            $insert = Departments::insert([
+            $insert = Services::insert([
                 "name" => ucwords($request->input("name")),
                 "description" => ucwords($request->input("description")),
                 "parent_dept" => $request->input("parent_dept") ?? null,
@@ -68,35 +62,12 @@ class DepartmentController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255|unique:departments,name,' . $id,
-                'description' => 'nullable|string',
-                'parent_dept' => 'nullable|exists:departments,id',
-            ]);
-            $update = Departments::where('id', $id)->update([
-                "name" => ucwords($request->input("name")),
-                "description" => ucwords($request->input("description")),
-                "parent_dept" => $request->input("parent_dept"),
-                "status" => $request->input("status") ?? 1
-            ]);
-            return response()->json([
-                'data' => $update,
-                'msg' => 'success',
-                'status' => 200
-            ]);
-        }catch(ValidationException  $e){
-            return response()->json(['data'=> $e->errors(), 'msg' => 'error' , 'status'=> 422]);
-        }
+        //
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Request$request, string $id)
     {
         try{
-            $delete = Departments::where('id',$id)->update([
+            $delete = Services::where('id',$id)->update([
                 'status' => -1,
                 'updated_at' => now(),
             ]);

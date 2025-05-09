@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string("description");
-            $table->string("type");
+            $table->tinyInteger("type");
             $table->string("amount");
             $table->boolean('status')->default(true);
             $table->timestamps();
