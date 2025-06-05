@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('general_settings', function (Blueprint $table) {
             $table->id();
             $table->json('name');
+            $table->json('address')->nullable();
             $table->json('icon');
             $table->string('user_code')->nullable();
             $table->text('license_code')->nullable();

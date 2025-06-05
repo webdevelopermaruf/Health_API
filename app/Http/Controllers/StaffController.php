@@ -52,7 +52,7 @@ class StaffController extends Controller
                 'department_id' => 'nullable|exists:departments,id',
                 'salary_structure_id' => 'nullable|exists:salary_structures,id',
                 'designation' => 'nullable|string',
-                'picture' => 'nullable|image',
+                'picture' => 'nullable|images',
                 'address' => 'nullable|string',
                 'dob' => 'nullable|date',
                 'qualification' => 'nullable|string',

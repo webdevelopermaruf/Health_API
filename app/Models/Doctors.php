@@ -15,4 +15,9 @@ class Doctors extends Model
     {
         return $this->belongsTo(Departments::class,'department_id');
     }
+
+    public function schedules(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(AppointmentSchedule::class,'doctors_id');
+    }
 }

@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('resources', function (Blueprint $table) {
+        Schema::create('rooms', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['OT', 'Cabin', 'Ward']);
+            $table->string('type');
             $table->string('room_no');
             $table->string('floor_no');
-            $table->string('bed_capacity');
-            $table->string('charge');
-            $table->boolean('status')->default(true);
+            $table->integer('bed_capacity');
+            $table->string('description')->nullable();
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('resources');
+        Schema::dropIfExists('rooms');
     }
 };

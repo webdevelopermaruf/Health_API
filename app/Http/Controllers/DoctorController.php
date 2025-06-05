@@ -10,10 +10,17 @@ use Illuminate\Validation\ValidationException;
 
 class DoctorController extends Controller
 {
-    public function index(){
-        $doctors = Doctors::whereNotIn('status', [-1])
-            ->with(['user','department'])
-            ->get();
+    public function index(Request $request){
+        if($request->query('dept')){
+            $doctors = Doctors::whereNotIn('status', [-1])
+                ->where('department_id', $request->query('dept'))
+                ->with(['user','department'])
+                ->get();
+        }else{
+            $doctors = Doctors::whereNotIn('status', [-1])
+                ->with(['user','department'])
+                ->get();
+        }
 
         return response()->json([
             'data'=> $doctors,
@@ -24,7 +31,7 @@ class DoctorController extends Controller
 
     public function show(string $id){
         return response()->json([
-            'data'=> Doctors::with(['user','department'])->findOrFail($id),
+            'data'=> Doctors::with(['user','department','schedules.room'])->findOrFail($id),
             'msg' => 'success',
             'status'=> 200
         ]);

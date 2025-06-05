@@ -8,19 +8,19 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-        type 1 = indoor service
-        type 2 = outdoor service
-        type 3 = diagnostic service
+     timeline 1 = hourly
+     timeline 2 = daily
      */
     public function up(): void
     {
-        Schema::create('services', function (Blueprint $table) {
+        Schema::create('beds', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string("description")->nullable();
-            $table->tinyInteger("type");
-            $table->decimal("amount", 10, 2);
-            $table->foreignIdFor(Rooms::class)->nullable();
+            $table->foreignIdFor(Rooms::class);
+            $table->string('bed_number');
+            $table->string('bed_type');
+            $table->decimal('price',10,2);
+            $table->tinyInteger('timeline')->default(1);
+            $table->tinyInteger('is_booked')->default(0);
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('services');
+        Schema::dropIfExists('beds');
     }
 };

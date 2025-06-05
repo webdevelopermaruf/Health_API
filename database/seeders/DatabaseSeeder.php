@@ -37,7 +37,8 @@ class DatabaseSeeder extends Seeder
         GeneralSettings::insert([
             "user_code" => "PHS",
             "name" => json_encode(["en"=> "Prime Hospital", "bn"=> "প্রাইম হসপিটাল"], JSON_UNESCAPED_UNICODE),
-            "icon" => json_encode(["icon"=> ""]),
+            "address" => json_encode(["en"=> "Bishwa Road, Subhanighat, Sylhet-3100", "bn"=> "বিশ্বরোড, সুবহানীঘাট, সিলেট-৩১০০", "hotline"=>"+8801714820333"], JSON_UNESCAPED_UNICODE),
+            "icon" => json_encode(["icon"=> "/images/logo.jpg"], JSON_UNESCAPED_UNICODE),
             "sms_api" => json_encode(["balance"=> 0, "rate"=> 0.35, "apikey"=> "8XYpeBwf0JMssLw3Cyxf"]),
             "attendance" => json_encode(["area_code"=>"BRC","area_id"=> 2, "server"=>"http://localhost:9090",
                 "username"=>"BRC_College","password"=>"3S1afTdU9cZdT"]),
@@ -51,6 +52,9 @@ class DatabaseSeeder extends Seeder
             DoctorSeeder::class,
             StaffSeeder::class,
             PayrollSeeder::class,
+            ServiceSeeder::class,
+            PatientSeeder::class,
+            ResourceSeeder::class,
         ]);
 
     }

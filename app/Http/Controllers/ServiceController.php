@@ -12,7 +12,7 @@ class ServiceController extends Controller
 {
     public function index()
     {
-        $services = Services::whereNotIn('status', [-1])->get();
+        $services = Services::whereNotIn('status', [-1])->with('room')->get();
         return response()->json([
             'data'=> $services,
             'msg' => 'success',
@@ -23,7 +23,7 @@ class ServiceController extends Controller
     public function show(string $id)
     {
         return response()->json([
-            'data'=> Services::where('id', $id)->first(),
+            'data'=> Services::where('id', $id)->with('room')->first(),
             'msg' => 'success',
             'status'=> 200
         ]);
@@ -36,21 +36,27 @@ class ServiceController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255|unique:departments',
+                'name' => 'required|string',
                 'description' => 'nullable|string',
-                'parent_dept' => 'nullable|exists:departments,id',
+                'type' => 'required',
+                'room' => 'nullable',
+                'amount' => 'integer|required',
             ]);
             $insert = Services::insert([
                 "name" => ucwords($request->input("name")),
                 "description" => ucwords($request->input("description")),
-                "parent_dept" => $request->input("parent_dept") ?? null,
-                "status" => $request->input("status") ?? 1
+                "type" => $request->input("type"),
+                "amount" => $request->input("amount"),
+                "rooms_id" => $request->input("room"),
+                "status" => $request->input("status") ?? 1,
+                "created_at" => now(),
+                "updated_at" => now(),
             ]);
-            return response()->json([
-                'data' => $insert,
-                'msg' => 'success',
-                'status' => 201
-            ]);
+            if($insert){
+                return response()->json(['data' => $request->all(), 'msg' => 'success', 'status' => 201]);
+            }else{
+                return response()->json(['data' => $request->all(), 'msg' => 'failed', 'status' => 400]);
+            }
         }catch(ValidationException  $e){
             return response()->json(['data'=> $e->errors(), 'msg' => 'error' , 'status'=> 422]);
         }
@@ -62,7 +68,31 @@ class ServiceController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string',
+                'description' => 'nullable|string',
+                'type' => 'required',
+                'room' => 'nullable',
+                'amount' => 'integer|required',
+            ]);
+            $update = Services::where('id', $id)->update([
+                "name" => ucwords($request->input("name")),
+                "description" => ucwords($request->input("description")),
+                "type" => $request->input("type"),
+                "amount" => $request->input("amount"),
+                "rooms_id" => $request->input("room"),
+                "status" => $request->input("status") ?? 1,
+                "updated_at" => now()
+            ]);
+            if($update){
+                return response()->json(['data' => $request->all(), 'msg' => 'success', 'status' => 200]);
+            }else{
+                return response()->json(['data' => $request->all(), 'msg' => 'failed', 'status' => 400]);
+            }
+        }catch(ValidationException  $e){
+            return response()->json(['data'=> $e->errors(), 'msg' => 'error' , 'status'=> 422]);
+        }
     }
     public function destroy(Request$request, string $id)
     {

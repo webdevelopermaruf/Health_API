@@ -33,6 +33,14 @@ class DepartmentController extends Controller
             'status'=> 200
         ]);
     }
+    public function doctorsDept()
+    {
+        return response()->json([
+            'data'=> Departments::has('doctors')->get(),
+            'msg' => 'success',
+            'status'=> 200
+        ]);
+    }
 
 
     /**
@@ -52,11 +60,11 @@ class DepartmentController extends Controller
                 "parent_dept" => $request->input("parent_dept") ?? null,
                 "status" => $request->input("status") ?? 1
             ]);
-            return response()->json([
-                'data' => $insert,
-                'msg' => 'success',
-                'status' => 201
-            ]);
+            if($insert){
+                return response()->json(['data' => $request->all(), 'msg' => 'success', 'status' => 201]);
+            }else{
+                return response()->json(['data' => $request->all(), 'msg' => 'failed', 'status' => 400]);
+            }
         }catch(ValidationException  $e){
             return response()->json(['data'=> $e->errors(), 'msg' => 'error' , 'status'=> 422]);
         }

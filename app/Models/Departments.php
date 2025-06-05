@@ -18,4 +18,8 @@ class Departments extends Model
     {
         return $this->hasMany(Departments::class, 'parent_dept');
     }
+    public function doctors()
+    {
+        return $this->hasMany(Doctors::class, 'department_id');
+    }
 }

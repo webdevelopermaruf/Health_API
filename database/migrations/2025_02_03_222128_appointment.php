@@ -20,9 +20,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('patient_id');
             $table->foreignId('doctor_id');
+            $table->foreignId('billing_id');
             $table->timestamp('appointment_date');
             $table->integer('serial_number');
-            $table->text('reason');
+            $table->string('room');
+            $table->text('reason')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
         });
