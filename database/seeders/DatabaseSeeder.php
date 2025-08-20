@@ -48,6 +48,7 @@ class DatabaseSeeder extends Seeder
 
         // departments
         $this->call([
+            FeatureSeeder::class,
             DepartmentSeeder::class,
             DoctorSeeder::class,
             StaffSeeder::class,

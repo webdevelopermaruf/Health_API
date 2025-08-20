@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('nid')->unique()->nullable();
             $table->string('phone')->nullable();
             $table->date('dob')->nullable();
-            $table->string('blood');
+            $table->string('blood')->nullable();
             $table->tinyInteger('gender');
             $table->string('address')->nullable();
             $table->tinyInteger('status')->default(1);

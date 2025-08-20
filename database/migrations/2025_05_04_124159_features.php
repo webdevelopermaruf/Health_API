@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('features', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('path');
+            $table->integer('parent')->nullable();
+            $table->tinyInteger('readonly')->default(1);
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });

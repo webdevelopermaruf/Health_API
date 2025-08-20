@@ -36,7 +36,7 @@ class StaffSeeder extends Seeder
                     'picture' => null,
                     'gender' => 2, // Female
                     'status' => 1,
-                    'permission' => json_encode(['view_patients', 'update_charts']),
+                    'permission' => null,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],
@@ -63,7 +63,7 @@ class StaffSeeder extends Seeder
                     'picture' => null,
                     'gender' => 1, // Male
                     'status' => 1,
-                    'permission' => json_encode(['manage_appointments', 'view_schedules']),
+                    'permission' => null,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],

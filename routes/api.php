@@ -6,6 +6,7 @@ use App\Http\Controllers\BedController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\LabReportController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\RoomController;
@@ -13,7 +14,7 @@ use App\Http\Controllers\SalaryStructureController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StaffController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -25,6 +26,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/add/department', [DepartmentController::class, 'store']);
     Route::post('/edit/department/{id}', [DepartmentController::class, 'update']);
     Route::post('/delete/department/{id}', [DepartmentController::class, 'destroy']);
+
+    // Users Route
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/update/permission/{id}', [UserController::class, 'updatePermission']);
+
+    // Features Route
+    Route::get('/features', [UserController::class, 'features']);
 
     // Doctors Route
     Route::get('/doctors', [DoctorController::class, 'index']);
@@ -40,7 +48,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/edit/staff/{id}', [StaffController::class, 'update']);
     Route::post('/delete/staff/{id}', [StaffController::class, 'destroy']);
 
-
     // Patients Route
     Route::get('/patients', [PatientController::class, 'index']);
     Route::get('/show/patient/{id}', [PatientController::class, 'show']);
@@ -54,7 +61,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/add/service', [ServiceController::class, 'store']);
     Route::post('/edit/service/{id}', [ServiceController::class, 'update']);
     Route::post('/delete/service/{id}', [ServiceController::class, 'destroy']);
-
 
     // Salary-Structure Route
     Route::get('/salary-structures', [SalaryStructureController::class, 'index']);
@@ -74,10 +80,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/appointment-scheduler', [AppointmentScheduleController::class, 'index']);
     Route::post('/update/appointment-scheduler', [AppointmentScheduleController::class, 'update']);
 
-
     // Billing Route
     Route::post('/create/bill', [BillingController::class, 'store']);
     Route::get('/billings', [BillingController::class, 'index']);
+    Route::get('pending-appointments', [BillingController::class, 'pending_appointments']);
+
+
+    // Lab Route
+    Route::get('/lab-reports', [LabReportController::class, 'index']);
+    Route::post('/upload/lab-report/{id}', [LabReportController::class, 'update']);
+    Route::post('/publish/lab-report/{id}', [LabReportController::class, 'publish']);
 
 
     // Room Route
@@ -96,9 +108,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/add/bed', [BedController::class, 'store']);
     Route::post('/edit/bed/{id}', [BedController::class, 'update']);
     Route::post('/delete/bed/{id}', [BedController::class, 'destroy']);
+
+
+    Route::post('/update/app', [SettingsController::class, 'update']);
 });
 
-Route::get('/settings', [SettingsController::class, 'index']);
+Route::get('/app', [SettingsController::class, 'index']);
 Route::get('/billing/{billId}', [BillingController::class, 'show']);
 Route::get('/login', [AuthController::class, 'index'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);

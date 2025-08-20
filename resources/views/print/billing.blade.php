@@ -36,8 +36,14 @@
 
     </style>
 </head>
-<body onload="window.print()">
+{{--<body onload="window.print()">--}}
+<body>
 <div class="receipt">
+    @php
+        $discountedPrices=0;
+        $servicePrice=0;
+    @endphp
+
     <header style="text-align: center">
         <img style="width:80px;" src="{{json_decode($settings->icon)->icon}}" alt="">
         <h2 class="center">{{json_decode($settings->name)->en}}</h2>
@@ -45,7 +51,11 @@
             Hotline: {{json_decode($settings->address)->hotline}} </p>
     </header>
     <hr style="margin:3px 0" />
-
+    <section style="display: flex; justify-content: space-between">
+        <p><b>Date: </b>{{date_format($data->updated_at, 'd-m-Y')}}</p>
+        <p><b>Time: </b>{{date_format($data->updated_at, 'h:i A')}} </p>
+    </section>
+    <hr style="margin:3px 0" />
     <section>
         <div>
             <p><b>Patient Name: </b>{{ $data->patient->name }} </p>
@@ -85,19 +95,24 @@
                     <td>{{ $service->service }} <br>
                         <strong>{{$service->room ? 'Room: '. $service->room : null}}</strong>
                    </td>
-                    <td style="text-align:right;">{{ $service->amount }}</td>
+                    <td style="text-align:right;">
+                        {{ number_format($service->amount,2) }}
+                    @php $servicePrice+= $service->amount @endphp
+                    </td>
                     <td style="text-align:right;">
                         @if(optional($service->discount)->type && optional($service->discount)->amount)
                             @if(optional($service->discount)->type === 1)
-                                {{optional($service->discount)->amount}}
+                                {{number_format(optional($service->discount)->amount,2)}}
+                                @php $discountedPrices+= optional($service->discount)->amount @endphp
                             @else
-                                {{optional($service->discount)->amount * .01 * $service->amount}}
+                                {{number_format(optional($service->discount)->amount * .01 * $service->amount,2)}}
+                                @php $servicePrice+= optional($service->discount)->amount * .01 * $service->amount @endphp
                             @endif
                         @else
                             0.00
                         @endif
                     </td>
-                    <td style="text-align:right;">{{ $service->total }}</td>
+                    <td style="text-align:right;">{{ number_format($service->total,2) }}</td>
                 </tr>
             @endforeach
             </tbody>
@@ -129,23 +144,37 @@
             <tbody>
                 <tr>
                     <td>Subtotal:</td>
-                    <td>{{ number_format($data->services_fee + $data->appointment_fee, 2) }}</td>
+                    <td>{{ number_format($servicePrice + $data->appointment_fee, 2) }}</td>
                 </tr>
                 <tr>
-                    <td>VAT:</td>
-                    <td>{{ $data->VAT }} %</td>
+                    <td>Discount: (-)</td>
+                    <td>
+                        @if(!$data->discount)
+                            {{number_format($discountedPrices,2)}}
+                        @else
+                            @if($data->discount_type === 1)
+                                {{number_format($discountedPrices + $data->discount, 2)}}
+                            @else
+                                {{ number_format( $discountedPrices +  (($servicePrice + $data->appointment_fee) * .01 * $data->discount), 2)}}
+                            @endif
+                        @endif
+                    </td>
+                </tr>
+                <tr>
+                    <td>VAT: (+)</td>
+                    <td>{{ number_format($data->VAT,2) }} %</td>
                 </tr>
                 <tr>
                     <td>Payable:</td>
-                    <td>{{ $data->payable }}</td>
+                    <td>{{ number_format($data->payable,2) }}</td>
                 </tr>
                 <tr>
                     <td>Received:</td>
-                    <td>{{ $data->received }}</td>
+                    <td>{{ number_format($data->received,2) }}</td>
                 </tr>
                 <tr>
                     <td>Changes:</td>
-                    <td>{{ $data->changes }}</td>
+                    <td>{{ number_format($data->changes,2) }}</td>
                 </tr>
                 <tr>
                     <td>Due:</td>

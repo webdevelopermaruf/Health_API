@@ -13,8 +13,8 @@ return new class extends Migration
     {
         /**
          * Permissions be like: {"1": 2, "2": 1} => key value pair here key is features foreign id, value is permission level
-         * Permission Levels : 1 => read-only 2=> not-allowed
-         * note: which is not mentions here that will be full control
+         * Permission Levels : 1 => read-only 0=> not-allowed
+         * note: which is not mention here that will be full control
          */
 
         Schema::create('users', function (Blueprint $table) {

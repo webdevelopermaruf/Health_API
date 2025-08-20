@@ -36,7 +36,7 @@ class DoctorSeeder extends Seeder
                     'picture' => null,
                     'gender' => 1, // Male
                     'status' => 1,
-                    'permission' => json_encode(['view_patients', 'edit_records']),
+                    'permission' => null,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],
@@ -67,7 +67,7 @@ class DoctorSeeder extends Seeder
                     'picture' => null,
                     'gender' => 2, // Female
                     'status' => 1,
-                    'permission' => json_encode(['view_patients', 'prescribe_medication']),
+                    'permission' => null,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],

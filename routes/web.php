@@ -2,3 +2,4 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::get('/get-report/{invoice}/{mobile_number}', [\App\Http\Controllers\BillingController::class, 'report']);

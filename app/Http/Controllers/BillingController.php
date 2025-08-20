@@ -19,7 +19,9 @@ class BillingController extends Controller
     public function index()
     {
         return response()->json([
-            'data'=> Billing::with(['patient', 'doctor.department' ,'appointment.doctor.user'])->whereNotIn('status', [-1])->get(),
+            'data'=> Billing::with(['patient' ,'appointment.doctor.user.department'])
+                ->orderBy('created_at', 'desc')
+                ->whereNotIn('status', [-1])->get(),
             'msg' => 'success',
             'status'=> 200
         ]);
@@ -27,8 +29,7 @@ class BillingController extends Controller
     public function show($billId)
     {
         $settings = GeneralSettings::first();
-        $data = Billing::with(['patient', 'doctor.department' ,'appointment.doctor.user'])->where('id', $billId)->first();
-//        return $data;
+        $data = Billing::with(['patient' ,'appointment.doctor.user.department'])->where('id', $billId)->first();
         return view('print.billing', ['data'=>$data, 'settings'=> $settings]);
     }
 
@@ -97,8 +98,8 @@ class BillingController extends Controller
                 'services' => json_encode($services),
                 'appointment_fee' => $request->input('fee'),
                 'services_fee' => $request->input('payable') - $request->input('fee'),
-                'discount_type' => $request->input('discount')?->type ?? null,
-                'discount' => $request->input('discount')?->amount ?? 0,
+                'discount_type' => $request->input('discount')['type'] ?? null,
+                'discount' => $request->input('discount')['amount'] ?? 0,
                 'VAT' => $request->input('VAT'),
                 'payable' => $request->input('payable'),
                 'received' => $request->input('received'),
@@ -117,7 +118,7 @@ class BillingController extends Controller
                        'billing_id' => $billing_id,
                        'patient_id' => $patientId,
                        'services_id' => $service['id'],
-                       'status' => 1,
+                       'status' => 0,
                        'user_id' => $user->id,
                        'created_at' => now(),
                        'updated_at' => now(),
@@ -129,20 +130,26 @@ class BillingController extends Controller
            }
            $appointment = null;
            if($request->input('isAppointment')){
-               $next_serial = Appointments::whereDate('appointment_date', $request->input('appointment_date'))
-                   ->where('doctor_id', $request->input('doctor'))->latest()->value('serial_number') + 1 ?? 1;
-               $appointment = Appointments::insertGetId([
-                   'patient_id' => $patientId,
-                   'doctor_id' => $request->input('doctor'),
-                   'billing_id' => $billing_id,
-                   'appointment_date' => $request->input('appointment_date'),
-                   'serial_number' => $next_serial,
-                   'room' => $request->input('appointment_room'),
-                   'reason' => $request->input('reason'),
-                   'status' => $request->input('status') ?? 1,
-                   'updated_at' => now(),
-                   'created_at' => now()
-               ]);
+               if(!$request->input('appointment_id')){
+                   $next_serial = Appointments::whereDate('appointment_date', $request->input('appointment_date'))
+                       ->where('doctor_id', $request->input('doctor'))->latest()->value('serial_number') + 1 ?? 1;
+                   $appointment = Appointments::insertGetId([
+                       'patient_id' => $patientId,
+                       'doctor_id' => $request->input('doctor'),
+                       'billing_id' => $billing_id,
+                       'appointment_date' => $request->input('appointment_date'),
+                       'slot' => $request->input('slot'),
+                       'serial_number' => $next_serial,
+                       'room' => $request->input('appointment_room'),
+                       'reason' => $request->input('reason'),
+                       'status' => $request->input('status') ?? 1,
+                       'updated_at' => now(),
+                       'created_at' => now()
+                   ]);
+               }else{
+                   $appointment = $request->input('appointment_id');
+                   Appointments::where('id', $appointment)->update(['status' => 1]);
+               }
                $updateBilling = Billing::where('id', $billing_id)->update([
                    'appointments_id' => $appointment,
                ]);
@@ -151,6 +158,21 @@ class BillingController extends Controller
         } catch (ValidationException  $e) {
             return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
         }
+    }
+    public function pending_appointments(){
+        return response()->json([
+            'data'=> Appointments::with(['patient', 'doctor.user.department', 'doctor.schedules'])->where('status', 0)->latest()->get(),
+            'msg' => 'success',
+            'status'=> 200
+        ]);
+    }
+
+    public function report($invoice, $mobile_number)
+    {
+        $checkBilling = Billing::with('patient')
+            ->where('id', $invoice)->first();
+        return $checkBilling;
+        return response()->json([]);
     }
 
 }

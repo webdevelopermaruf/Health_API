@@ -20,4 +20,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function department(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Departments::class,'department_id');
+    }
 }
