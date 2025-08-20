@@ -69,7 +69,7 @@ class StaffController extends Controller
             $user = User::insertGetId([
                 'code' => 'EMP-' . $next_number,
                 'name' => ucwords($request->name),
-                'email' => $request->email,
+                'email' => strtolower($request->email),
                 'phone' => $request->phone,
                 'password' => Hash::make($request->password), // default or random password
                 'designation' => ucwords($request->designation),
@@ -128,7 +128,7 @@ class StaffController extends Controller
             ]);
             $user = User::where('id', $staff->user_id)->update([
                 'name' => ucwords($request->name),
-                'email' => $request->email,
+                'email' => strtolower($request->email),
                 'phone' => $request->phone,
                 'password' => $request->password,
                 'designation' => ucwords($request->designation),

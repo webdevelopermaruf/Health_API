@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Doctors;
 use App\Models\User;
+use Buglinjo\LaravelWebp\Facades\Webp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class DoctorController extends Controller
@@ -53,7 +55,7 @@ class DoctorController extends Controller
                 'experience' => 'nullable|string',
                 'about' => 'required|string',
                 'availability' => 'required|string',
-                'picture' => 'nullable|string',
+                'picture' => 'nullable|image|mimes:jpeg,png,jpg,webp',
                 'address' => 'nullable|string',
                 'dob' => 'nullable|date',
                 'blood' => 'nullable|string',
@@ -63,6 +65,20 @@ class DoctorController extends Controller
 
             $last_code = User::where('code', 'like', 'DR-%')->max('code');
             $next_number = $last_code ? (int) str_replace('DR-', '', $last_code) + 1 : date('y') . '0001';
+            $directory = "users/DR-" . $next_number;
+            $hasUploadedPicture = false;
+            if (!Storage::disk('public')->exists($directory)) {
+                Storage::disk('public')->makeDirectory($directory);
+            }
+
+            if ($request->file('picture') && $request->file('picture')->getClientOriginalExtension() === 'webp') {
+                $request->file('picture')->storeAs($directory, "picture.webp", 'public');
+                $hasUploadedPicture = true;
+            } else if ($request->file('picture')) {
+                Webp::make($request->file('picture'))
+                    ->save(storage_path("app/public/{$directory}/picture.webp"));
+                $hasUploadedPicture = true;
+            }
 
             $user = User::insertGetId([
                 'code' => 'DR-' . $next_number,
@@ -76,7 +92,7 @@ class DoctorController extends Controller
                 'dob' => $request->dob,
                 'blood' => $request->blood,
                 'gender' => $request->gender,
-                'picture' => $request->picture,
+                'picture' => $hasUploadedPicture? "/storage/users/DR-" . $next_number . "/picture.webp": null,
                 'status' => $request->status ?? 1,
                 'updated_at' => now(),
                 'created_at' => now(),
@@ -121,16 +137,17 @@ class DoctorController extends Controller
                 'experience' => 'nullable|string',
                 'about' => 'required|string',
                 'availability' => 'required|string',
-                'picture' => 'nullable|string',
+                'picture' => 'nullable|image|mimes:jpeg,png,jpg,webp',
                 'address' => 'nullable|string',
                 'dob' => 'nullable|date',
                 'blood' => 'nullable|string',
                 'gender'=> 'nullable',
                 'status' => 'required',
             ]);
+
             $user = User::where('id', $doctor->user_id)->update([
                 'name' => ucwords($request->name),
-                'email' => $request->email,
+                'email' => strtolower($request->email),
                 'phone' => $request->phone,
                 'password' => $request->password,
                 'designation' => ucwords($request->designation),

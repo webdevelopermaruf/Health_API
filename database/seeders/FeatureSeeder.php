@@ -54,6 +54,12 @@ class FeatureSeeder extends Seeder
                     'name' => 'Lab & Diagnostics',
                     'path' => '/lab-diagnostics',
                     'status' => 1,
+                ],
+                [
+                    'id' => 8,
+                    'name' => 'Pharmacy',
+                    'path' => '/pharmacy',
+                    'status' => 1,
                 ]
             ];
         $children = [
@@ -175,7 +181,23 @@ class FeatureSeeder extends Seeder
                 'path' => '/service-manager/resources/beds',
                 'parent' => 4002,
                 'status' => 1,
-            ]
+            ],
+
+            // billing,
+            [
+            'id' => 6001,
+            'name' => 'Outdoor Billing',
+            'path' => '/billing/outdoor',
+            'parent' => 6,
+            'status' => 1,
+            ],
+            [
+            'id' => 6002,
+            'name' => 'Indoor Billing',
+            'path' => '/billing/indoor',
+            'parent' => 6,
+            'status' => 1,
+            ],
         ];
 
         Features::where('status', 1)->delete();

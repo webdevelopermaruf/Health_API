@@ -9,12 +9,14 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\LabReportController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\PharmacySuppliersController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\SalaryStructureController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\UserController;
+use App\Models\PharmacyMedicinesController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -108,6 +110,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/add/bed', [BedController::class, 'store']);
     Route::post('/edit/bed/{id}', [BedController::class, 'update']);
     Route::post('/delete/bed/{id}', [BedController::class, 'destroy']);
+
+    // pharmacy suppliers
+    Route::get('/suppliers', [PharmacySuppliersController::class, 'index']);
+    Route::get('/show/supplier/{id}', [PharmacySuppliersController::class, 'show']);
+    Route::post('/add/supplier', [PharmacySuppliersController::class, 'store']);
+    Route::post('/edit/supplier/{id}', [PharmacySuppliersController::class, 'update']);
+    Route::post('/delete/supplier/{id}', [PharmacySuppliersController::class, 'destroy']);
+
+    // pharmacy medicines
+    Route::get('/medicines', [PharmacyMedicinesController::class, 'index']);
+    Route::get('/show/medicine/{id}', [PharmacyMedicinesController::class, 'show']);
+    Route::post('/add/medicine', [PharmacyMedicinesController::class, 'store']);
+    Route::post('/edit/medicine/{id}', [PharmacyMedicinesController::class, 'update']);
+    Route::post('/delete/medicine/{id}', [PharmacyMedicinesController::class, 'destroy']);
+
 
 
     Route::post('/update/app', [SettingsController::class, 'update']);
