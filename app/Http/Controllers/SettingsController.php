@@ -19,10 +19,12 @@ class SettingsController extends Controller
     public function index(Request $request)
     {
         $settings = GeneralSettings::first();
-        if($request->header('Authorization')){
-            $accessToken = PersonalAccessToken::findToken(ltrim($request->header('Authorization'),  'Bearer '));
+        if($request->header('token')){
+            $accessToken = PersonalAccessToken::findToken($request->header('token'));
             $user = $accessToken->tokenable;
             $settings->permissions =  json_decode($user->permission);
+            $settings->username = $user['name'];
+            $settings->code = $user['code'];
         }
 
         return response()->json([
@@ -38,7 +40,6 @@ class SettingsController extends Controller
         try {
             $validatedData = $request->validate([
                 'name' => 'required',
-                'icon' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp',
                 'maintenance' => 'required',
                 'sms' => 'required',
             ]);
@@ -54,7 +55,6 @@ class SettingsController extends Controller
                 'icon' => $icon_path,
                 'maintenance' => $request->input('maintenance'),
                 'sms' => $request->input('sms'),
-                'sms_api' => json_encode($request->input('sms_api')),
                 'updated_at' => now(),
             ]);
 

@@ -149,7 +149,7 @@ class DoctorController extends Controller
                 'name' => ucwords($request->name),
                 'email' => strtolower($request->email),
                 'phone' => $request->phone,
-                'password' => $request->password,
+                'password' => $request->editedPassword ? bcrypt($request->password) : $request->password,
                 'designation' => ucwords($request->designation),
                 'department_id' => $request->department_id,
                 'address' => ucwords($request->address),

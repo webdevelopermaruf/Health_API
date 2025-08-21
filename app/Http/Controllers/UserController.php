@@ -31,8 +31,8 @@ class UserController extends Controller
 
     public function updatePermission(Request $request, string $id)
     {
-        $token = ltrim($request->header('Authorization'),  'Bearer ');
-        if($request->header('Authorization')){
+        $token = $request->header('token');
+        if($request->header('token')){
             $accessToken = PersonalAccessToken::findToken($token);
             $user = $accessToken->tokenable;
         }
