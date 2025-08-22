@@ -198,6 +198,52 @@ class FeatureSeeder extends Seeder
             'parent' => 6,
             'status' => 1,
             ],
+
+            // lab reports
+            [
+                'id' => 7001,
+                'name' => 'Lab Report',
+                'path' => '/lab-diagnostics/lab-reports',
+                'parent' => 7,
+                'status' => 1,
+            ],
+            [
+                'id' => 7002,
+                'name' => 'Lab Delivery',
+                'path' => '/lab-diagnostics/lab-delivery',
+                'parent' => 7,
+                'status' => 1,
+            ],
+
+            // pharmacy
+            [
+                'id' => 8001,
+                'name' => 'Medicines',
+                'path' => '/pharmacy/medicine',
+                'parent' => 8,
+                'status' => 1,
+            ],
+            [
+                'id' => 8002,
+                'name' => 'Suppliers',
+                'path' => '/pharmacy/suppliers',
+                'parent' => 8,
+                'status' => 1,
+            ],
+            [
+                'id' => 8003,
+                'name' => 'Purchases',
+                'path' => '/pharmacy/purchases',
+                'parent' => 8,
+                'status' => 1,
+            ],
+            [
+                'id' => 8004,
+                'name' => 'Sales',
+                'path' => '/pharmacy/sales',
+                'parent' => 8,
+                'status' => 1,
+            ],
         ];
 
         Features::where('status', 1)->delete();

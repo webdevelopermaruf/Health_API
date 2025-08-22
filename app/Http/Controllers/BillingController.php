@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Appointments;
-use App\Models\AppointmentSchedule;
 use App\Models\Billing;
+use App\Models\BillingTransactions;
 use App\Models\GeneralSettings;
 use App\Models\LabReport;
 use App\Models\Patient;
-use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -30,7 +28,9 @@ class BillingController extends Controller
     {
         $settings = GeneralSettings::first();
         $data = Billing::with(['patient' ,'appointment.doctor.user.department'])->where('id', $billId)->first();
-        return view('print.billing', ['data'=>$data, 'settings'=> $settings]);
+        if($data){
+            return view('print.billing', ['data'=>$data, 'settings'=> $settings]);
+        }
     }
 
     public function store(Request $request){
@@ -104,12 +104,23 @@ class BillingController extends Controller
                 'payable' => $request->input('payable'),
                 'received' => $request->input('received'),
                 'changes' => $request->input('changes'),
-                'payment_methods_id' => $request->input('payment_method'),
                 'user_id' => $user->id,
                 'status' => $request->input('status') ?? 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+           BillingTransactions::insert([
+               'patient_id' => $patientId,
+               'cases_id' => null,
+               'trx_type' => 1, // 0 = refund 1 = payment
+               'amount' => $request->input('received'),
+               'billing_id' => $billing_id,
+               'billing_type' => 1, // 1 = hospital billing counter, 2 = pharmacy counter
+               'payment_methods_id' => $request->input('payment_method') ?? 1,
+               'user_id' => $user->id, // received by
+               'created_at' => now(),
+               'updated_at' => now(),
+           ]);
            // lab reports
            $lab = [];
            foreach ($services as $service) {
@@ -132,7 +143,7 @@ class BillingController extends Controller
            if($request->input('isAppointment')){
                if(!$request->input('appointment_id')){
                    $next_serial = Appointments::whereDate('appointment_date', $request->input('appointment_date'))
-                       ->where('doctor_id', $request->input('doctor'))->latest()->value('serial_number') + 1 ?? 1;
+                       ->where('doctor_id', $request->input('doctor'))->latest()->value('serial_number') + 1 ?? 1000;
                    $appointment = Appointments::insertGetId([
                        'patient_id' => $patientId,
                        'doctor_id' => $request->input('doctor'),

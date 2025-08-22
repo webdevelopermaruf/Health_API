@@ -1,7 +1,6 @@
 <?php
 
-use App\Models\Appointments;
-use App\Models\Doctors;
+use App\Models\Cases;
 use App\Models\Patient;
 use App\Models\PaymentMethods;
 use App\Models\User;
@@ -13,22 +12,15 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Status 0 = Pending Payment
-     * Status 1 = Paid
-     * Status -1 = Cancel.
-     *
-     *
+     * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('billings', function (Blueprint $table) {
+        Schema::create('pharmacy_billings', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Patient::class);
-            $table->foreignIdFor(Doctors::class)->nullable();
-            $table->foreignIdFor(Appointments::class)->nullable();
-            $table->json('services')->nullable();
-            $table->decimal('appointment_fee', 10,2)->nullable();
-            $table->decimal('services_fee', 10,2)->nullable();
+            $table->foreignIdFor(Cases::class)->nullable();
+            $table->json('medicines')->nullable();
             $table->tinyInteger('discount_type')->nullable();
             $table->decimal('discount', 10,2)->nullable();
             $table->decimal('VAT', 10,2)->comment('percent')->nullable();
@@ -40,8 +32,9 @@ return new class extends Migration
             $table->timestamps();
         });
         Schema::table('billings', function (Blueprint $table) {
-            DB::statement('ALTER TABLE billings AUTO_INCREMENT = 1000;');
+            DB::statement('ALTER TABLE pharmacy_billings AUTO_INCREMENT = 1000;');
         });
+
     }
 
     /**
@@ -49,6 +42,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('billings');
+        Schema::dropIfExists('pharmacy_billings');
     }
 };

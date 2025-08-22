@@ -9,6 +9,8 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\LabReportController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\PharmacyBillingController;
+use App\Http\Controllers\PharmacyMedicinesController;
 use App\Http\Controllers\PharmacySuppliersController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\SalaryStructureController;
@@ -16,7 +18,6 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\UserController;
-use App\Models\PharmacyMedicinesController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -84,15 +85,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Billing Route
     Route::post('/create/bill', [BillingController::class, 'store']);
+    Route::post('/create/pharmacy/bill', [PharmacyBillingController::class, 'store']);
     Route::get('/billings', [BillingController::class, 'index']);
     Route::get('pending-appointments', [BillingController::class, 'pending_appointments']);
 
 
     // Lab Route
     Route::get('/lab-reports', [LabReportController::class, 'index']);
+    Route::get('/lab-delivery', [LabReportController::class, 'delivery']);
     Route::post('/upload/lab-report/{id}', [LabReportController::class, 'update']);
     Route::post('/publish/lab-report/{id}', [LabReportController::class, 'publish']);
-
+    Route::post('/delivered/lab-report/{id}', [LabReportController::class, 'delivered']);
 
     // Room Route
     Route::get('/floors', [RoomController::class, 'floors']);
@@ -125,6 +128,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/edit/medicine/{id}', [PharmacyMedicinesController::class, 'update']);
     Route::post('/delete/medicine/{id}', [PharmacyMedicinesController::class, 'destroy']);
 
+    Route::get('/medicine/units', [PharmacyMedicinesController::class, 'index']);
+    Route::get('/search/medicine/{search}', [PharmacyMedicinesController::class, 'search']);
+
 
 
     Route::post('/update/app', [SettingsController::class, 'update']);
@@ -132,5 +138,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 Route::get('/app', [SettingsController::class, 'index']);
 Route::get('/billing/{billId}', [BillingController::class, 'show']);
+Route::get('/billing/pharmacy/{billId}', [PharmacyBillingController::class, 'showPharmacy']);
 Route::get('/login', [AuthController::class, 'index'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);

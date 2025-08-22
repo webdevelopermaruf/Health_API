@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Staffs;
 use App\Models\User;
+use Buglinjo\LaravelWebp\Facades\Webp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class StaffController extends Controller
@@ -52,7 +54,7 @@ class StaffController extends Controller
                 'department_id' => 'nullable|exists:departments,id',
                 'salary_structure_id' => 'nullable|exists:salary_structures,id',
                 'designation' => 'nullable|string',
-                'picture' => 'nullable|images',
+                'picture' => 'nullable',
                 'address' => 'nullable|string',
                 'dob' => 'nullable|date',
                 'qualification' => 'nullable|string',
@@ -65,20 +67,21 @@ class StaffController extends Controller
 
             $last_code = User::where('code', 'like', 'EMP-%')->max('code');
             $next_number = $last_code ? (int) str_replace('EMP-', '', $last_code) + 1 : date('y') . '0001';
+            $hasUploadedPicture = $this->isHasUploadedPicture('EMP-'.$next_number, $request);
 
             $user = User::insertGetId([
                 'code' => 'EMP-' . $next_number,
                 'name' => ucwords($request->name),
                 'email' => strtolower($request->email),
                 'phone' => $request->phone,
-                'password' => Hash::make($request->password), // default or random password
+                'password' => $request->editedPassword ? bcrypt($request->password) : $request->password,
                 'designation' => ucwords($request->designation),
                 'department_id' => $request->department_id,
                 'address' => ucwords($request->address),
                 'dob' => $request->dob,
                 'blood' => $request->blood,
                 'gender' => $request->gender,
-                'picture' => $request->picture,
+                'picture' => $hasUploadedPicture? "/users/EMP-" . $next_number . "/picture.webp": "/users/default.png",
                 'status' => $request->status ?? 1,
                 'updated_at' => now(),
                 'created_at' => now(),
@@ -108,7 +111,7 @@ class StaffController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $staff = Staffs::findOrFail($id);
+            $staff = Staffs::with('user')->findOrFail($id);
             $request->validate([
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users,id,'.$staff->user_id,
@@ -119,23 +122,26 @@ class StaffController extends Controller
                 'qualification' => 'nullable|string',
                 'experience' => 'nullable|string',
                 'about' => 'required|string',
-                'picture' => 'nullable|string',
+                'picture' => 'nullable',
                 'address' => 'nullable|string',
                 'dob' => 'nullable|date',
                 'blood' => 'nullable|string',
                 'gender'=> 'nullable',
                 'status' => 'required',
             ]);
+            $code = $staff->user->code;
+            $hasUploadedPicture = $this->isHasUploadedPicture($code, $request);
+
             $user = User::where('id', $staff->user_id)->update([
                 'name' => ucwords($request->name),
                 'email' => strtolower($request->email),
                 'phone' => $request->phone,
-                'password' => $request->password,
+                'password' => $request->editedPassword ? bcrypt($request->password) : $request->password,
                 'designation' => ucwords($request->designation),
                 'department_id' => $request->department_id,
                 'address' => ucwords($request->address),
                 'dob' => $request->dob,
-                'picture' => $request->picture,
+                'picture' => $hasUploadedPicture? "/users/" . $code . "/picture.webp": $staff->user->picture,
                 'blood' => $request->blood,
                 'gender' => $request->gender,
                 'status' => $request->status ?? 1,
@@ -183,5 +189,23 @@ class StaffController extends Controller
         catch(ValidationException  $e){
             return response()->json(['data'=> $e->errors(), 'msg' => 'error' , 'status'=> 422]);
         }
+    }
+    public function isHasUploadedPicture(mixed $code, Request $request): bool
+    {
+        $directory = "users/" . $code;
+        $hasUploadedPicture = false;
+        if (!Storage::disk('public')->exists($directory)) {
+            Storage::disk('public')->makeDirectory($directory);
+        }
+
+        if ($request->file('picture') && $request->file('picture')->getClientOriginalExtension() === 'webp') {
+            $request->file('picture')->storeAs($directory, "picture.webp", 'public');
+            $hasUploadedPicture = true;
+        } else if ($request->file('picture')) {
+            Webp::make($request->file('picture'))
+                ->save(storage_path("app/public/{$directory}/picture.webp"));
+            $hasUploadedPicture = true;
+        }
+        return $hasUploadedPicture;
     }
 }

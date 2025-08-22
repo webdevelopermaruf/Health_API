@@ -55,7 +55,7 @@ class DoctorController extends Controller
                 'experience' => 'nullable|string',
                 'about' => 'required|string',
                 'availability' => 'required|string',
-                'picture' => 'nullable|image|mimes:jpeg,png,jpg,webp',
+                'picture' => 'nullable',
                 'address' => 'nullable|string',
                 'dob' => 'nullable|date',
                 'blood' => 'nullable|string',
@@ -65,20 +65,7 @@ class DoctorController extends Controller
 
             $last_code = User::where('code', 'like', 'DR-%')->max('code');
             $next_number = $last_code ? (int) str_replace('DR-', '', $last_code) + 1 : date('y') . '0001';
-            $directory = "users/DR-" . $next_number;
-            $hasUploadedPicture = false;
-            if (!Storage::disk('public')->exists($directory)) {
-                Storage::disk('public')->makeDirectory($directory);
-            }
-
-            if ($request->file('picture') && $request->file('picture')->getClientOriginalExtension() === 'webp') {
-                $request->file('picture')->storeAs($directory, "picture.webp", 'public');
-                $hasUploadedPicture = true;
-            } else if ($request->file('picture')) {
-                Webp::make($request->file('picture'))
-                    ->save(storage_path("app/public/{$directory}/picture.webp"));
-                $hasUploadedPicture = true;
-            }
+            $hasUploadedPicture = $this->isHasUploadedPicture("DR-".$next_number, $request);
 
             $user = User::insertGetId([
                 'code' => 'DR-' . $next_number,
@@ -92,7 +79,7 @@ class DoctorController extends Controller
                 'dob' => $request->dob,
                 'blood' => $request->blood,
                 'gender' => $request->gender,
-                'picture' => $hasUploadedPicture? "/storage/users/DR-" . $next_number . "/picture.webp": null,
+                'picture' => $hasUploadedPicture? "/users/DR-" . $next_number . "/picture.webp" : "/users/default.png",
                 'status' => $request->status ?? 1,
                 'updated_at' => now(),
                 'created_at' => now(),
@@ -124,7 +111,7 @@ class DoctorController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $doctor = Doctors::findOrFail($id);
+            $doctor = Doctors::with('user')->findOrFail($id);
             $request->validate([
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users,id,'.$doctor->user_id,
@@ -137,14 +124,15 @@ class DoctorController extends Controller
                 'experience' => 'nullable|string',
                 'about' => 'required|string',
                 'availability' => 'required|string',
-                'picture' => 'nullable|image|mimes:jpeg,png,jpg,webp',
+                'picture' => 'nullable',
                 'address' => 'nullable|string',
                 'dob' => 'nullable|date',
                 'blood' => 'nullable|string',
                 'gender'=> 'nullable',
                 'status' => 'required',
             ]);
-
+            $code = $doctor->user->code;
+            $hasUploadedPicture = $this->isHasUploadedPicture($code, $request);
             $user = User::where('id', $doctor->user_id)->update([
                 'name' => ucwords($request->name),
                 'email' => strtolower($request->email),
@@ -154,7 +142,7 @@ class DoctorController extends Controller
                 'department_id' => $request->department_id,
                 'address' => ucwords($request->address),
                 'dob' => $request->dob,
-                'picture' => $request->picture,
+                'picture' => $hasUploadedPicture? "/users/" . $code . "/picture.webp": $doctor->user->picture,
                 'blood' => $request->blood,
                 'gender' => $request->gender,
                 'status' => $request->status ?? 1,
@@ -200,5 +188,29 @@ class DoctorController extends Controller
         catch(ValidationException  $e){
             return response()->json(['data'=> $e->errors(), 'msg' => 'error' , 'status'=> 422]);
         }
+    }
+
+    /**
+     * @param mixed $code
+     * @param Request $request
+     * @return bool
+     */
+    public function isHasUploadedPicture(mixed $code, Request $request): bool
+    {
+        $directory = "users/" . $code;
+        $hasUploadedPicture = false;
+        if (!Storage::disk('public')->exists($directory)) {
+            Storage::disk('public')->makeDirectory($directory);
+        }
+
+        if ($request->file('picture') && $request->file('picture')->getClientOriginalExtension() === 'webp') {
+            $request->file('picture')->storeAs($directory, "picture.webp", 'public');
+            $hasUploadedPicture = true;
+        } else if ($request->file('picture')) {
+            Webp::make($request->file('picture'))
+                ->save(storage_path("app/public/{$directory}/picture.webp"));
+            $hasUploadedPicture = true;
+        }
+        return $hasUploadedPicture;
     }
 }

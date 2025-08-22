@@ -43,10 +43,10 @@ class PharmacyMedicinesController extends Controller
             $request->validate([
                 'code'          => 'required|string|unique:pharmacy_medicines,code',
                 'name'          => 'required|string',
+                'unit'          => 'required|string',
                 'generic_name'  => 'required|string',
                 'pharmacy_supplier_id'  => 'required|integer',
                 'shelf'         => 'nullable|string',
-                'company'       => 'nullable|string',
                 'factory_price' => 'required|numeric|min:0',
                 'sales_price'   => 'required|numeric|min:0',
                 'qty'           => 'required|integer|min:0',
@@ -57,10 +57,10 @@ class PharmacyMedicinesController extends Controller
             $insert = PharmacyMedicines::insert([
                 'code'          => strtolower($request->code),
                 'name'          => ucwords($request->name),
+                'unit'          => ucwords($request->unit),
                 'generic_name'  => ucwords($request->generic_name),
                 'shelf'         => $request->shelf,
                 'pharmacy_supplier_id'=> $request->pharmacy_supplier_id,
-                'company'       => $request->company,
                 'factory_price' => $request->factory_price,
                 'sales_price'   => $request->sales_price,
                 'qty'           => $request->qty,
@@ -90,10 +90,10 @@ class PharmacyMedicinesController extends Controller
             $request->validate([
                 'code'          => "required|string|unique:pharmacy_medicines,code,$id",
                 'name'          => 'required|string',
+                'unit'          => 'required|string',
                 'generic_name'  => 'required|string',
                 'shelf'         => 'nullable|string',
                 'pharmacy_supplier_id'  => 'required|integer',
-                'company'       => 'nullable|string',
                 'factory_price' => 'required|numeric|min:0',
                 'sales_price'   => 'required|numeric|min:0',
                 'qty'           => 'required|integer|min:0',
@@ -104,10 +104,10 @@ class PharmacyMedicinesController extends Controller
             $update = PharmacyMedicines::where('id', $id)->update([
                 'code'          => strtolower($request->code),
                 'name'          => ucwords($request->name),
+                'unit'          => ucwords($request->unit),
                 'generic_name'  => ucwords($request->generic_name),
                 'shelf'         => $request->shelf,
                 'pharmacy_supplier_id'=> $request->pharmacy_supplier_id,
-                'company'       => $request->company,
                 'factory_price' => $request->factory_price,
                 'sales_price'   => $request->sales_price,
                 'qty'           => $request->qty,
@@ -147,5 +147,30 @@ class PharmacyMedicinesController extends Controller
         } catch (ValidationException $e) {
             return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
         }
+    }
+
+    public function search(string $search)
+    {
+        try{
+            $medicines = PharmacyMedicines::where('name', 'like', "%{$search}%")
+                ->orWhere('generic_name', 'like', "%{$search}%")
+                ->orWhere('code', 'like', "%{$search}%")
+                ->limit(10)
+                ->get();
+
+            return response()->json(['data' => $medicines, 'msg' => 'success', 'status' => 200]);
+
+
+        } catch (ValidationException $e) {
+            return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
+        }
+    }
+
+    public function units(){
+        return response()->json([
+            'data'=> PharmacyMedicines::pluck('unit')->unique()->values()->all(),
+            'msg' => 'success',
+            'status'=> 200
+        ]);
     }
 }

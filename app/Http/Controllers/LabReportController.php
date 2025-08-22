@@ -22,6 +22,17 @@ class LabReportController extends Controller
         ]);
     }
 
+    public function delivery()
+    {
+        return response()->json([
+            'data'=> LabReport::where('status', 2)
+                ->with(['patient','billing', 'service'])
+                ->get(),
+            'msg' => 'success',
+            'status'=> 200
+        ]);
+    }
+
 
     /**
      * Update the specified resource in storage.
@@ -60,6 +71,18 @@ class LabReportController extends Controller
         try{
             $update = LabReport::where('id', $id)->update([
                 'status' => 2,
+            ]);
+            return response()->json(['data' => $update, 'msg' => 'success', 'status' => 200]);
+        }catch (ValidationException  $e) {
+            return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
+        }
+    }
+
+    public function delivered(string $id)
+    {
+        try{
+            $update = LabReport::where('id', $id)->update([
+                'status' => 3,
             ]);
             return response()->json(['data' => $update, 'msg' => 'success', 'status' => 200]);
         }catch (ValidationException  $e) {

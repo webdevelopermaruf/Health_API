@@ -14,7 +14,7 @@ class PayrollSeeder extends Seeder
      */
     public function run(): void
     {
-        $paymentMethods = ['Credit Card', 'Roket', 'PayPal', 'Bank Transfer', 'Cash', 'Bkash', 'Nogod', 'Upay', "Bank Check"];
+        $paymentMethods = ['Cash','Credit/ Debit Car', 'Roket', 'PayPal', 'Bank Transfer', 'Bkash', 'Nogod', 'Upay', "Bank Cheque"];
         for ($i = 0; $i < count($paymentMethods); $i++) {
             PaymentMethods::insert([
                 "name" => $paymentMethods[$i],
@@ -24,31 +24,43 @@ class PayrollSeeder extends Seeder
                 "updated_at" => now(),
             ]);
         }
-
-        $designations = [
-            'Registered Nurse',
-            'Receptionist',
-            'Lab Assistant',
-            'Pharmacist',
-            'Accountant',
-            'HR Officer',
-            'Ward Clerk',
-            'Physiotherapist',
-            'Technician',
-        ];
-        for ($i = 0; $i < 5; $i++) {
-            $designation = $designations[array_rand($designations)]; //
-            SalaryStructure::insert([
-                "designation" => $designation,
-                "basic_salary" => rand(20, 50) * 1000,
-                "salary_type" => rand(1, 5),
-                "overtime_rate" => rand(1, 5) * 1000,
-                "overtime_type" => rand(1, 5),
+        SalaryStructure::insert([
+                "designation" => "Staff",
+                "basic_salary" => 0,
+                "salary_type" => 1, // monthly
+                "overtime_rate" => 0,
+                "overtime_type" => 4, // hourly
                 "allowances" => json_encode([]),
                 "deductions" => json_encode([]),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-        }
+
+//        $designations = [
+//            'Registered Nurse',
+//            'Receptionist',
+//            'Lab Assistant',
+//            'Pharmacist',
+//            'Accountant',
+//            'HR Officer',
+//            'Ward Clerk',
+//            'Physiotherapist',
+//            'Technician',
+//        ];
+//        for ($i = 0; $i < 5; $i++) {
+//            $designation = $designations[array_rand($designations)]; //
+//            SalaryStructure::insert([
+//                "designation" => $designation,
+//                "basic_salary" => rand(20, 50) * 1000,
+//                "salary_type" => rand(1, 5),
+//                "overtime_rate" => rand(1, 5) * 1000,
+//                "overtime_type" => rand(1, 5),
+//                "allowances" => json_encode([]),
+//                "deductions" => json_encode([]),
+//                'created_at' => now(),
+//                'updated_at' => now(),
+//            ]);
+//        }
+
     }
 }

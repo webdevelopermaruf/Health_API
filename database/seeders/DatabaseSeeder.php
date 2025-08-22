@@ -56,6 +56,7 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class,
             PatientSeeder::class,
             ResourceSeeder::class,
+            PharmacySeeder::class,
         ]);
 
     }
