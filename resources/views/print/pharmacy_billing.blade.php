@@ -92,7 +92,7 @@
                             <td style="text-align: left">{{ $medicine->name }}</td>
                             <td style="text-align: center">{{ number_format($medicine->price, 2) }}</td>
                             <td style="text-align: right">{{ $medicine->qty }}</td>
-                            <td style="text-align: right">{{ $subtotal+= number_format($medicine->price * $medicine->qty, 2) }}</td>
+                            <td style="text-align: right">{{ $subtotal += number_format(floatval($medicine->price) * floatval($medicine->qty), 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
