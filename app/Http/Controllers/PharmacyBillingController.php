@@ -2,10 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Appointments;
-use App\Models\Billing;
 use App\Models\GeneralSettings;
-use App\Models\LabReport;
 use App\Models\Patient;
 use App\Models\PharmacyBilling;
 use App\Models\BillingTransactions;
@@ -21,7 +18,13 @@ class PharmacyBillingController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json([
+            'data'=> PharmacyBilling::with(['patient'])
+                ->orderBy('created_at', 'desc')
+                ->whereNotIn('status', [-1])->get(),
+            'msg' => 'success',
+            'status'=> 200
+        ]);
     }
 
     public function store(Request $request){
@@ -72,10 +75,9 @@ class PharmacyBillingController extends Controller
                 ]);
             }
 
-            // check stocks
+            // decrement stocks
             foreach ($request->input('medicines') as $medicine) {
                 $med = PharmacyMedicines::find($medicine['id']);
-                // Check stock first
                 $med->decrement('qty', $medicine['qty']);
             }
 

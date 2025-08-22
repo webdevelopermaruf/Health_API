@@ -87,6 +87,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/create/bill', [BillingController::class, 'store']);
     Route::post('/create/pharmacy/bill', [PharmacyBillingController::class, 'store']);
     Route::get('/billings', [BillingController::class, 'index']);
+    Route::get('/pharmacy_billings', [PharmacyBillingController::class, 'index']);
     Route::get('pending-appointments', [BillingController::class, 'pending_appointments']);
 
 
