@@ -7,3 +7,7 @@ Route::get('/get-report/{invoice}/{mobile_number}', [\App\Http\Controllers\Billi
 Route::get('/storage', function () {
     Artisan::call('storage:link');
 });
+
+Route::get('/refresh-database', function () {
+    Artisan::call('migrate:refresh --seed');
+});
