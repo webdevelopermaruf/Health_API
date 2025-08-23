@@ -103,7 +103,13 @@
 
     <section class="totals">
         <div>
-            <h6 class="paidBox">PAID</h6>
+            <h6 class="paidBox">
+                @if($data->payable - $data->received == 0)
+                    PAID
+                @else
+                    DUE
+                @endif
+            </h6>
         </div>
         <table>
             <tbody>
