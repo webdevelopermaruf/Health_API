@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('blood')->nullable();
             $table->tinyInteger('gender');
             $table->string('address')->nullable();
+            $table->json('local_guardian')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });

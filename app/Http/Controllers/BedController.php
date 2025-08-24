@@ -42,6 +42,15 @@ class BedController extends Controller
         ]);
     }
 
+    public function available(){
+        $beds = Beds::with('room')->where('is_booked',0)->get();
+        return response()->json([
+            'data'=> $beds,
+            'msg' => 'success',
+            'status'=> 200
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */

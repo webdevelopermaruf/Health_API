@@ -60,7 +60,20 @@ class FeatureSeeder extends Seeder
                     'name' => 'Pharmacy',
                     'path' => '/pharmacy',
                     'status' => 1,
-                ]
+                ],
+                [
+                    'id' => 9,
+                    'name' => 'Indoor Manager',
+                    'path' => '/indoor-manager',
+                    'status' => 1,
+                ],
+                [
+                    'id' => 10,
+                    'name' => 'Website Manager',
+                    'path' => '/website-manager',
+                    'status' => 1,
+                ],
+
             ];
         $children = [
             [

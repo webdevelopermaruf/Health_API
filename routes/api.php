@@ -6,6 +6,7 @@ use App\Http\Controllers\BedController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\IndoorController;
 use App\Http\Controllers\LabReportController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\PaymentMethodController;
@@ -110,10 +111,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // bed Route
     Route::get('/beds', [BedController::class, 'index']);
     Route::get('/beds/types', [BedController::class, 'types']);
+    Route::get('/beds/available', [BedController::class, 'available']);
     Route::get('/show/bed/{id}', [BedController::class, 'show']);
     Route::post('/add/bed', [BedController::class, 'store']);
     Route::post('/edit/bed/{id}', [BedController::class, 'update']);
     Route::post('/delete/bed/{id}', [BedController::class, 'destroy']);
+
 
     // pharmacy suppliers
     Route::get('/suppliers', [PharmacySuppliersController::class, 'index']);
@@ -132,7 +135,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/medicine/units', [PharmacyMedicinesController::class, 'index']);
     Route::get('/search/medicine/{search}', [PharmacyMedicinesController::class, 'search']);
 
-
+    Route::post('/indoor/admission', [IndoorController::class, 'store']);
+    Route::get('/indoor/patients', [PatientController::class, 'index']);
+    Route::get('/indoor/cases', [IndoorController::class, 'cases']);
 
     Route::post('/update/app', [SettingsController::class, 'update']);
 });
