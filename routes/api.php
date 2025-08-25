@@ -19,6 +19,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\UserController;
+use App\Models\RequisitionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -132,9 +133,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/edit/medicine/{id}', [PharmacyMedicinesController::class, 'update']);
     Route::post('/delete/medicine/{id}', [PharmacyMedicinesController::class, 'destroy']);
 
-    Route::get('/medicine/units', [PharmacyMedicinesController::class, 'index']);
-    Route::get('/search/medicine/{search}', [PharmacyMedicinesController::class, 'search']);
 
+    // pharmacy medicines
+    Route::get('/requisition', [RequisitionController::class, 'index']);
+    Route::post('/request/requisition', [RequisitionController::class, 'store']);
+    Route::post('/edit/requisition/{id}', [RequisitionController::class, 'update']);
+    Route::post('/delete/requisition/{id}', [RequisitionController::class, 'destroy']);
+
+
+
+    Route::get('/medicine/units', [PharmacyMedicinesController::class, 'units']);
+    Route::get('/search/medicine/{search}', [PharmacyMedicinesController::class, 'search']);
     Route::post('/indoor/admission', [IndoorController::class, 'store']);
     Route::get('/indoor/patients', [PatientController::class, 'index']);
     Route::get('/indoor/cases', [IndoorController::class, 'cases']);
