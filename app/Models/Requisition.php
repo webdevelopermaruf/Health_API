@@ -6,14 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Requisition extends Model
 {
+    public $table = 'pharmacy_requisitions';
+
     public function requisite_by(){
-        return $this->belongsTo(User::class,'requested_by');
+        return $this->belongsTo(User::class,'requisite_by');
     }
-    public function bill(){
-        return $this->belongsTo(PharmacyBilling::class,'requested_by');
+    public function billing(){
+        return $this->belongsTo(PharmacyBilling::class,'pharmacy_billing_id');
     }
 
     public function case(){
-        return $this->belongsTo(Cases::class,'requested_by');
+        return $this->belongsTo(Cases::class,'cases_id');
     }
 }

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('code');
             $table->string('unit');
             $table->string('name');
+            $table->string('strength')->nullable();
             $table->string('generic_name');
             $table->string('shelf')->nullable();
             $table->foreignIdFor(PharmacySupplier::class)->nullable();

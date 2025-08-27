@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\PharmacyMedicineImport;
 use App\Models\PharmacyMedicines;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PharmacyMedicinesController extends Controller
 {
@@ -13,7 +16,11 @@ class PharmacyMedicinesController extends Controller
      */
     public function index()
     {
-        $medicines = PharmacyMedicines::with('supplier')->whereNotIn('status', [-1])->get();
+        $medicines = Cache::get('pharmacy_medicines');
+        if(!$medicines){
+            $medicines = PharmacyMedicines::with('supplier')->whereNotIn('status', [-1])->get();
+            Cache::put('pharmacy_medicines', $medicines, 3600);
+        }
 
         return response()->json([
             'data'   => $medicines,
@@ -44,6 +51,7 @@ class PharmacyMedicinesController extends Controller
                 'code'          => 'required|string|unique:pharmacy_medicines,code',
                 'name'          => 'required|string',
                 'unit'          => 'required|string',
+                'strength'          => 'required|string',
                 'generic_name'  => 'required|string',
                 'pharmacy_supplier_id'  => 'required|integer',
                 'shelf'         => 'nullable|string',
@@ -58,6 +66,7 @@ class PharmacyMedicinesController extends Controller
                 'code'          => strtolower($request->code),
                 'name'          => ucwords($request->name),
                 'unit'          => ucwords($request->unit),
+                'strength'          => ucwords($request->strength),
                 'generic_name'  => ucwords($request->generic_name),
                 'shelf'         => $request->shelf,
                 'pharmacy_supplier_id'=> $request->pharmacy_supplier_id,
@@ -69,7 +78,7 @@ class PharmacyMedicinesController extends Controller
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);
-
+            PharmacyMedicines::updateMedicines();
             if ($insert) {
                 return response()->json(['data' => $request->all(), 'msg' => 'success', 'status' => 201]);
             } else {
@@ -91,6 +100,7 @@ class PharmacyMedicinesController extends Controller
                 'code'          => "required|string|unique:pharmacy_medicines,code,$id",
                 'name'          => 'required|string',
                 'unit'          => 'required|string',
+                'strength'          => 'required|string',
                 'generic_name'  => 'required|string',
                 'shelf'         => 'nullable|string',
                 'pharmacy_supplier_id'  => 'required|integer',
@@ -105,6 +115,7 @@ class PharmacyMedicinesController extends Controller
                 'code'          => strtolower($request->code),
                 'name'          => ucwords($request->name),
                 'unit'          => ucwords($request->unit),
+                'strength'          => ucwords($request->strength),
                 'generic_name'  => ucwords($request->generic_name),
                 'shelf'         => $request->shelf,
                 'pharmacy_supplier_id'=> $request->pharmacy_supplier_id,
@@ -115,7 +126,7 @@ class PharmacyMedicinesController extends Controller
                 'status'        => $request->status ?? 1,
                 'updated_at'    => now(),
             ]);
-
+            PharmacyMedicines::updateMedicines();
             if ($update) {
                 return response()->json(['data' => $request->all(), 'msg' => 'success', 'status' => 200]);
             } else {
@@ -137,7 +148,7 @@ class PharmacyMedicinesController extends Controller
                 'status'     => -1,
                 'updated_at' => now(),
             ]);
-
+            PharmacyMedicines::updateMedicines();
             if ($delete) {
                 return response()->json(['data' => $request->all(), 'msg' => 'success', 'status' => 200]);
             } else {
@@ -152,10 +163,10 @@ class PharmacyMedicinesController extends Controller
     public function search(string $search)
     {
         try{
-            $medicines = PharmacyMedicines::where('name', 'like', "%{$search}%")
+            $medicines = PharmacyMedicines::with('supplier')->where('name', 'like', "%{$search}%")
                 ->orWhere('generic_name', 'like', "%{$search}%")
                 ->orWhere('code', 'like', "%{$search}%")
-                ->limit(10)
+                ->limit(20)
                 ->get();
 
             return response()->json(['data' => $medicines, 'msg' => 'success', 'status' => 200]);
@@ -173,4 +184,5 @@ class PharmacyMedicinesController extends Controller
             'status'=> 200
         ]);
     }
+
 }

@@ -257,6 +257,13 @@ class FeatureSeeder extends Seeder
                 'parent' => 8,
                 'status' => 1,
             ],
+            [
+                'id' => 8005,
+                'name' => 'Requisitions',
+                'path' => '/pharmacy/requisitions',
+                'parent' => 8,
+                'status' => 1,
+            ],
         ];
 
         Features::where('status', 1)->delete();

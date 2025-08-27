@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\BedAllocation;
 use App\Models\Beds;
+use App\Models\BillingTransactions;
 use App\Models\Cases;
+use App\Models\IndoorBillings;
 use App\Models\Patient;
+use App\Models\PharmacyBilling;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -17,7 +20,7 @@ class IndoorController extends Controller
      */
     public function cases()
     {
-        $cases = Cases::with(['patient', 'department', 'prepared', 'doctor.user', 'referred', 'bed.room'])->where('status', 1)->get();
+        $cases = Cases::with(['patient', 'department', 'prepared', 'doctor.user', 'requisitions', 'referred', 'bed.room'])->where('status', 1)->get();
         return response()->json([
             'data'=> $cases,
             'msg' => 'success',
@@ -111,9 +114,38 @@ class IndoorController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function indoorBillingData(Request $request)
     {
-        //
+        try {
+            $data = $request->validate([
+                'cases_id' =>  'nullable',
+                'bed' =>  'nullable',
+                'phone' =>  'nullable',
+            ]);
+            $output = [];
+            $case_id = [];
+            if($data['cases_id']){
+                $case_id = $request->input('cases_id');
+                $get_data = Cases::with('patient.cases')->where('id', $data['cases_id'])->first();
+            }else if($data['bed']){
+                 $get_data = Beds::with('bed.cases.patient')->where('id', $data['bed'])->first();
+                 $case_id= $get_data['bed']['cases']['id'];
+
+            }else if($data['phone']){
+                 $get_data = Patient::with('cases')->where('phone', $data['phone'])->first();
+                 $case_id= $get_data['cases']['id'];
+            }
+            // fetch pharmacy bills
+            $output['pharmacy'] = PharmacyBilling::where('cases_id', $case_id)->get();
+            $output['transaction']= BillingTransactions::where('cases_id', $case_id)->get();
+
+            $output['bed_bills'] = BedAllocation::with('beds')->where('cases_id', $case_id)->get();
+            $output['services'] = IndoorBillings::where('cases_id', $case_id)->first();
+
+            return response()->json(['data' => $output, 'msg' => 'success', 'status'=> 200]);
+        }catch (ValidationException $e){
+            return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
+        }
     }
 
     /**

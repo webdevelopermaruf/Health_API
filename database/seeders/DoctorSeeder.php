@@ -24,7 +24,7 @@ class DoctorSeeder extends Seeder
             [
                 'user' => [
                     'code' => 'DR-' . $next_number,
-                    'name' => 'Dr. John Smith',
+                    'name' => 'Dr. Medicine',
                     'email' => 'john.smith@example.com',
                     'phone' => '202-555-0123',
                     'password' => Hash::make('password123'),
@@ -33,7 +33,7 @@ class DoctorSeeder extends Seeder
                     'address' => '123 Heart Lane, City, Country',
                     'dob' => '1975-06-15',
                     'blood' => 'O+',
-                    'picture' => null,
+                    'picture' => "/users/default.png",
                     'gender' => 1, // Male
                     'status' => 1,
                     'permission' => null,
@@ -55,7 +55,7 @@ class DoctorSeeder extends Seeder
             [
                 'user' => [
                     'code' => 'DR-' . ($next_number + 1),
-                    'name' => 'Dr. Emily Johnson',
+                    'name' => 'Dr. Surgery',
                     'email' => 'emily.johnson@example.com',
                     'phone' => '202-555-0456',
                     'password' => Hash::make('password123'),
@@ -64,7 +64,7 @@ class DoctorSeeder extends Seeder
                     'address' => '456 Brain Ave, City, Country',
                     'dob' => '1980-03-22',
                     'blood' => 'A-',
-                    'picture' => null,
+                    'picture' => "/users/default.png",
                     'gender' => 2, // Female
                     'status' => 1,
                     'permission' => null,

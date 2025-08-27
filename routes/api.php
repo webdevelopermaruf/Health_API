@@ -13,13 +13,13 @@ use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PharmacyBillingController;
 use App\Http\Controllers\PharmacyMedicinesController;
 use App\Http\Controllers\PharmacySuppliersController;
+use App\Http\Controllers\RequisitionController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\SalaryStructureController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\UserController;
-use App\Models\RequisitionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -88,7 +88,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Billing Route
     Route::post('/create/bill', [BillingController::class, 'store']);
     Route::post('/create/pharmacy/bill', [PharmacyBillingController::class, 'store']);
+    Route::post('/purchase/pharmacy', [PharmacyBillingController::class, 'purchase']);
+    Route::post('/pay-due/purchase/pharmacy/{id}', [PharmacyBillingController::class, 'duePayPurchase']);
+
+
+    Route::post('/requisite/pharmacy/bill', [PharmacyBillingController::class, 'requisite']);
     Route::get('/billings', [BillingController::class, 'index']);
+
     Route::get('/pharmacy_billings', [PharmacyBillingController::class, 'index']);
     Route::get('pending-appointments', [BillingController::class, 'pending_appointments']);
 
@@ -103,6 +109,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Room Route
     Route::get('/floors', [RoomController::class, 'floors']);
     Route::get('/rooms', [RoomController::class, 'index']);
+    Route::get('/booked-room', [RoomController::class, 'booked']);
     Route::get('/rooms/types', [RoomController::class, 'types']);
     Route::get('/show/room/{id}', [RoomController::class, 'show']);
     Route::post('/add/room', [RoomController::class, 'store']);
@@ -118,13 +125,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/edit/bed/{id}', [BedController::class, 'update']);
     Route::post('/delete/bed/{id}', [BedController::class, 'destroy']);
 
-
     // pharmacy suppliers
     Route::get('/suppliers', [PharmacySuppliersController::class, 'index']);
     Route::get('/show/supplier/{id}', [PharmacySuppliersController::class, 'show']);
     Route::post('/add/supplier', [PharmacySuppliersController::class, 'store']);
     Route::post('/edit/supplier/{id}', [PharmacySuppliersController::class, 'update']);
     Route::post('/delete/supplier/{id}', [PharmacySuppliersController::class, 'destroy']);
+
+    Route::get('/pharmacy/purchases', [PharmacyBillingController::class, 'getPurchases']);
+    Route::get('/pharmacy/medicines/purchases/{id}', [PharmacyBillingController::class, 'getMedicinePurchases']);
 
     // pharmacy medicines
     Route::get('/medicines', [PharmacyMedicinesController::class, 'index']);
@@ -134,12 +143,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/delete/medicine/{id}', [PharmacyMedicinesController::class, 'destroy']);
 
 
-    // pharmacy medicines
-    Route::get('/requisition', [RequisitionController::class, 'index']);
+    // pharmacy requisitions
+    Route::get('/requisitions', [RequisitionController::class, 'index']);
+    Route::get('/requisition/{id}', [RequisitionController::class, 'show']);
     Route::post('/request/requisition', [RequisitionController::class, 'store']);
     Route::post('/edit/requisition/{id}', [RequisitionController::class, 'update']);
     Route::post('/delete/requisition/{id}', [RequisitionController::class, 'destroy']);
-
 
 
     Route::get('/medicine/units', [PharmacyMedicinesController::class, 'units']);
@@ -147,6 +156,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/indoor/admission', [IndoorController::class, 'store']);
     Route::get('/indoor/patients', [PatientController::class, 'index']);
     Route::get('/indoor/cases', [IndoorController::class, 'cases']);
+    Route::post('/indoor/billing', [IndoorController::class, 'indoorBillingData']);
 
     Route::post('/update/app', [SettingsController::class, 'update']);
 });

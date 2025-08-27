@@ -9,7 +9,11 @@ use Illuminate\Validation\ValidationException;
 class LabReportController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     status == 0 pending
+     * status == 1 ready
+     * status == 2 published
+     * status == 3 == delivered
+     *
      */
     public function index()
     {
@@ -25,7 +29,7 @@ class LabReportController extends Controller
     public function delivery()
     {
         return response()->json([
-            'data'=> LabReport::where('status', 2)
+            'data'=> LabReport::where('status', 2) // published
                 ->with(['patient','billing', 'service'])
                 ->get(),
             'msg' => 'success',
@@ -43,7 +47,7 @@ class LabReportController extends Controller
             $files = $request->file('files');
             $reports = [];
             foreach ($files as $file) {
-                $filename = now()->format('Ymd_Hi_v') . '.' . $file->getClientOriginalExtension();
+                $filename = now()->format('Ymd_Hi_v') . '.' . strtolower($file->getClientOriginalExtension());
                 $path = $file->storeAs('lab_reports/'.$id, $filename, 'public');
                 $reports[] = $path;
             }
@@ -52,25 +56,22 @@ class LabReportController extends Controller
                 $existingReports = $get->report ? json_decode($get->report, true) : [];
                 $reports = array_merge($existingReports, $reports);
                 $get->report = json_encode($reports);
+                $get->status = 1; // ready
                 $get->save();
             }else{
-                $update = LabReport::where('id', $id)->update([
-                    'report' =>  $reports,
-                ]);
+                return response()->json(['data' => "not found", 'msg' => 'error', 'status' => 400]);
             }
             return response()->json(['data' => $reports, 'msg' => 'success', 'status' => 200]);
         } catch (ValidationException  $e) {
             return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
         }
-
-
     }
 
     public function publish(string $id)
     {
         try{
             $update = LabReport::where('id', $id)->update([
-                'status' => 2,
+                'status' => 2, // published
             ]);
             return response()->json(['data' => $update, 'msg' => 'success', 'status' => 200]);
         }catch (ValidationException  $e) {
@@ -82,7 +83,7 @@ class LabReportController extends Controller
     {
         try{
             $update = LabReport::where('id', $id)->update([
-                'status' => 3,
+                'status' => 3, // delivered
             ]);
             return response()->json(['data' => $update, 'msg' => 'success', 'status' => 200]);
         }catch (ValidationException  $e) {

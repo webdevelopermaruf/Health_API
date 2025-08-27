@@ -7,6 +7,7 @@ use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -29,6 +30,9 @@ return new class extends Migration
             $table->foreignIdFor(User::class, 'referred_by')->nullable();
             // is_discharged == 0 because it's active case
             $table->timestamps();
+        });
+        Schema::table('cases', function (Blueprint $table) {
+            DB::statement('ALTER TABLE cases AUTO_INCREMENT = 1000;');
         });
     }
 

@@ -24,16 +24,16 @@ class StaffSeeder extends Seeder
             [
                 'user' => [
                     'code' => 'EMP-' . $next_number,
-                    'name' => 'Sarah Davis',
+                    'name' => 'Mr Accountant',
                     'email' => 'sarah.davis@example.com',
                     'phone' => '202-555-0789',
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make('accounts'),
                     'designation' => 'Registered Nurse',
                     'department_id' => 6, // Emergency Medicine (from DepartmentSeeder)
                     'address' => '789 Care Street, City, Country',
                     'dob' => '1990-11-05',
                     'blood' => 'B+',
-                    'picture' => null,
+                    'picture' => "/users/default.png",
                     'gender' => 2, // Female
                     'status' => 1,
                     'permission' => null,
@@ -51,17 +51,17 @@ class StaffSeeder extends Seeder
             [
                 'user' => [
                     'code' => 'EMP-' . ($next_number + 1),
-                    'name' => 'Michael Brown',
+                    'name' => 'Mr Receptionist',
                     'email' => 'michael.brown@example.com',
                     'phone' => '202-555-0987',
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make('reception'),
                     'designation' => 'Receptionist',
                     'department_id' => 6, // Emergency Medicine
                     'address' => '101 Welcome Road, City, Country',
                     'dob' => '1985-07-12',
-                    'blood' => 'O-',
-                    'picture' => null,
-                    'gender' => 1, // Male
+                    'blood' => 'B+',
+                    'picture' => "/users/default.png",
+                    'gender' => 0, // Male
                     'status' => 1,
                     'permission' => null,
                     'created_at' => now(),
@@ -70,6 +70,33 @@ class StaffSeeder extends Seeder
                 'staff' => [
                     'department_id' => 6, // Emergency Medicine
                     'salary_structure_id' => 2, // Receptionist Salary
+                    'status' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+            ],
+            [
+                'user' => [
+                    'code' => 'EMP-' . ($next_number + 2),
+                    'name' => 'Mr Lab',
+                    'email' => 'lab.brown@example.com',
+                    'phone' => '202-555-0687',
+                    'password' => Hash::make('lab'),
+                    'designation' => 'Laboratorist',
+                    'department_id' => 6, // Emergency Medicine
+                    'address' => '101 Welcome Road, City, Country',
+                    'dob' => '1985-07-12',
+                    'blood' => 'O-',
+                    'picture' => "/users/default.png",
+                    'gender' => 1, // Male
+                    'status' => 1,
+                    'permission' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                'staff' => [
+                    'department_id' => 6, // Emergency Medicine
+                    'salary_structure_id' => 2, // Salary
                     'status' => 1,
                     'created_at' => now(),
                     'updated_at' => now(),

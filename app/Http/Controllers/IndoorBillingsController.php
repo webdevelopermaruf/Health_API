@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RequisitionController;
+use App\Models\IndoorBillings;
 use Illuminate\Http\Request;
 
-class RequisitionControllerController extends Controller
+class IndoorBillingsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class RequisitionControllerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(RequisitionController $requisitionController)
+    public function show(IndoorBillings $indoorBillings)
     {
         //
     }
@@ -42,7 +42,7 @@ class RequisitionControllerController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(RequisitionController $requisitionController)
+    public function edit(IndoorBillings $indoorBillings)
     {
         //
     }
@@ -50,7 +50,7 @@ class RequisitionControllerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, RequisitionController $requisitionController)
+    public function update(Request $request, IndoorBillings $indoorBillings)
     {
         //
     }
@@ -58,7 +58,7 @@ class RequisitionControllerController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(RequisitionController $requisitionController)
+    public function destroy(IndoorBillings $indoorBillings)
     {
         //
     }

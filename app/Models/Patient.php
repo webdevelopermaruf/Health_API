@@ -11,4 +11,8 @@ class Patient extends Model
     {
         return Carbon::parse($this->dob)->age;
     }
+    public function cases()
+    {
+        return $this->hasOne(Cases::class, 'patient_id', 'id')->where('status', 1);
+    }
 }

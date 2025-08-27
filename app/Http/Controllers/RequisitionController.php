@@ -1,20 +1,31 @@
 <?php
 
-namespace App\Models;
+namespace App\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Requisition;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
 
-class RequisitionController extends Model
+class RequisitionController extends Controller
 {
     public function index()
     {
-        $requisitions = Requisition::with(['case','bill.patient', 'requisite_by'])->whereNotIn('status', [-1])->get();
-
+        $requisitions = Requisition::with(['case.patient', 'case.bed.room', 'case.department','billing.patient', 'requisite_by'])
+            ->orderBy('status', 'desc')
+            ->whereNotIn('status', [-1])->get();
         return response()->json([
             'data'   => $requisitions,
+            'msg'    => 'success',
+            'status' => 200,
+        ]);
+    }
+
+    public function show(string $id)
+    {
+        $requisition = Requisition::with(['case','bill.patient', 'requisite_by'])->where('id', $id)->whereNotIn('status', [-1])->get();
+        return response()->json([
+            'data'   => $requisition,
             'msg'    => 'success',
             'status' => 200,
         ]);
@@ -28,15 +39,15 @@ class RequisitionController extends Model
 
             $request->validate([
                 'cases_id'          => 'required|integer',
-                'medicines'          => 'required|string',
+                'medicines'          => 'required',
             ]);
 
             $insert = Requisition::insert([
                 'cases_id'        => $request->cases_id,
-                'medicines'        => $request->medicines,
+                'medicines'        => json_encode($request->medicines),
                 'pharmacy_billing_id' => null,
                 'requisite_by'        => $user->id,
-                'status'        => $request->status ?? 1,
+                'status'        => $request->status ?? 0, // 0 = sent request; 1 = ready for pickup; 2 = done
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);
@@ -52,7 +63,8 @@ class RequisitionController extends Model
         }
     }
 
-    public function update(Request $request, string $id){
+    public function update(Request $request, string $id)
+    {
         try {
             $token = explode(' ', $request->header('Authorization'))[1];
             $accessToken = PersonalAccessToken::findToken($token);
@@ -68,7 +80,7 @@ class RequisitionController extends Model
                 'medicines'        => $request->medicines,
                 'pharmacy_billing_id' => null,
                 'requisite_by'        => $user->id,
-                'status'        => $request->status ?? 1,
+                'status'        => $request->status ?? 0,
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);

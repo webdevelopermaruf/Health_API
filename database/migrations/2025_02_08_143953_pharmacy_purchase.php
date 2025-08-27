@@ -1,6 +1,7 @@
     <?php
 
-use Illuminate\Database\Migrations\Migration;
+    use App\Models\PharmacySupplier;
+    use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
@@ -13,10 +14,12 @@ return new class extends Migration
     {
         Schema::create('pharmacy_purchases', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('supplier');
+            $table->foreignIdFor(PharmacySupplier::class);
             $table->text('medicines');
-            $table->string('quantity');
-            $table->decimal('price', 10, 2);
+            $table->integer('total_qty');
+            $table->decimal('payable', 10, 2);
+            $table->decimal('paid', 10, 2);
+            $table->tinyInteger('status')->default(1); // 1 == paid 0 = Due
             $table->timestamps();
         });
     }

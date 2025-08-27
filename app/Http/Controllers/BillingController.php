@@ -177,13 +177,11 @@ class BillingController extends Controller
             'status'=> 200
         ]);
     }
-
     public function report($invoice, $mobile_number)
     {
         $checkBilling = Billing::with('patient')
             ->where('id', $invoice)->first();
         return $checkBilling;
-        return response()->json([]);
     }
 
 }

@@ -30,6 +30,20 @@ class RoomController extends Controller
         ]);
     }
 
+    public function booked(Request $request){
+
+            $rooms = Beds::with('room')->whereNotIn('status', [-1])
+                ->where('is_booked', 1)
+                ->orderBy('rooms_id', 'asc')->get();
+
+        return response()->json([
+            'data'=> $rooms,
+            'msg' => 'success',
+            'status'=> 200
+        ]);
+    }
+
+
     public function show(string $id){
         return response()->json([
             'data'=> Rooms::findOrFail($id),

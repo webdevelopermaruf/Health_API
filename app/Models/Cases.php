@@ -27,4 +27,8 @@ class Cases extends Model
     public function bed(){
         return $this->hasOneThrough(Beds::class, BedAllocation::class, 'cases_id', 'id', 'id', 'current_bed');
     }
+
+    public function requisitions(){
+        return $this->hasMany(Requisition::class, 'cases_id');
+    }
 }
