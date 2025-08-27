@@ -163,14 +163,23 @@ class PharmacyMedicinesController extends Controller
     public function search(string $search)
     {
         try{
-            $medicines = PharmacyMedicines::with('supplier')->where('name', 'like', "%{$search}%")
-                ->orWhere('generic_name', 'like', "%{$search}%")
-                ->orWhere('code', 'like', "%{$search}%")
+            $medicines = PharmacyMedicines::with('supplier')
+                ->where(function ($query) use ($search) {
+                    $query->where('name', 'like', "%{$search}%")
+                        ->orWhere('generic_name', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%");
+                })
+                ->orderByRaw("
+        CASE
+            WHEN name LIKE ? THEN 1
+            WHEN generic_name LIKE ? THEN 2
+            WHEN code LIKE ? THEN 3
+            ELSE 4
+        END, name ASC
+    ", ["%{$search}%", "%{$search}%", "%{$search}%"])
                 ->limit(20)
                 ->get();
-
-            return response()->json(['data' => $medicines, 'msg' => 'success', 'status' => 200]);
-
+        return response()->json(['data' => $medicines, 'msg' => 'success', 'status' => 200]);
 
         } catch (ValidationException $e) {
             return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);

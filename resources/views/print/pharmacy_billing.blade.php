@@ -95,7 +95,8 @@
                             @php
                                 $subtotal += floatval($medicine->price) * floatval($medicine->qty);
                             @endphp
-                            <td style="text-align: right">{{ number_format($subtotal, 2) }}</td>                        </tr>
+                            <td style="text-align: right">{{ number_format(floatval($medicine->price) * floatval($medicine->qty), 2) }}</td>
+                        </tr>
                     @endforeach
                 </tbody>
             </table>

@@ -126,25 +126,32 @@ class IndoorController extends Controller
             $case_id = [];
             if($data['cases_id']){
                 $case_id = $request->input('cases_id');
-                $get_data = Cases::with('patient.cases')->where('id', $data['cases_id'])->first();
+                $get_data = Cases::with('patient.cases.patient')->where('id', $data['cases_id'])->first();
+                $output['patient'] = $get_data['patient']['cases']['patient'];
+                $output['cases'] = $get_data;
             }else if($data['bed']){
                  $get_data = Beds::with('bed.cases.patient')->where('id', $data['bed'])->first();
                  $case_id= $get_data['bed']['cases']['id'];
+                 $output['patient'] = $get_data['bed']['cases']['patient'];
+                $output['cases'] = $get_data['bed']['cases'];
 
             }else if($data['phone']){
                  $get_data = Patient::with('cases')->where('phone', $data['phone'])->first();
                  $case_id= $get_data['cases']['id'];
+                 $output['patient'] = $get_data;
+                 $output['cases'] = $get_data['cases'];
             }
             // fetch pharmacy bills
             $output['pharmacy'] = PharmacyBilling::where('cases_id', $case_id)->get();
             $output['transaction']= BillingTransactions::where('cases_id', $case_id)->get();
-
             $output['bed_bills'] = BedAllocation::with('beds')->where('cases_id', $case_id)->get();
             $output['services'] = IndoorBillings::where('cases_id', $case_id)->first();
 
             return response()->json(['data' => $output, 'msg' => 'success', 'status'=> 200]);
         }catch (ValidationException $e){
             return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
+        }catch (\Exception $e){
+            return response()->json(['data' => "Not Found", 'msg' => 'error', 'status' => 404]);
         }
     }
 
