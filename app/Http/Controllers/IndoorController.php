@@ -10,6 +10,7 @@ use App\Models\IndoorBillings;
 use App\Models\Patient;
 use App\Models\PharmacyBilling;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -20,7 +21,12 @@ class IndoorController extends Controller
      */
     public function cases()
     {
-        $cases = Cases::with(['patient', 'department', 'prepared', 'doctor.user', 'requisitions', 'referred', 'bed.room'])->where('status', 1)->get();
+        $cases = Cases::with(['patient', 'department', 'prepared', 'doctor.user', 'requisitions', 'referred', 'bed.room', 'allocations'])->where('status', 1)->get();
+        foreach ($cases as $case) {
+            $case->current_allocation = collect($case->allocations)
+                ->whereNull('exited_at')
+                ->first()?->id;
+        }
         return response()->json([
             'data'=> $cases,
             'msg' => 'success',
@@ -122,7 +128,7 @@ class IndoorController extends Controller
                 'bed' =>  'nullable',
                 'phone' =>  'nullable',
             ]);
-            $output = [];
+//            $output = ;
             $case_id = [];
             if($data['cases_id']){
                 $case_id = $request->input('cases_id');
@@ -144,7 +150,7 @@ class IndoorController extends Controller
             // fetch pharmacy bills
             $output['pharmacy'] = PharmacyBilling::where('cases_id', $case_id)->get();
             $output['transaction']= BillingTransactions::where('cases_id', $case_id)->get();
-            $output['bed_bills'] = BedAllocation::with('beds')->where('cases_id', $case_id)->get();
+            $output['bed_bills'] = BedAllocation::with('beds', 'allocator')->where('cases_id', $case_id)->get();
             $output['services'] = IndoorBillings::where('cases_id', $case_id)->first();
 
             return response()->json(['data' => $output, 'msg' => 'success', 'status'=> 200]);
@@ -158,24 +164,114 @@ class IndoorController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function bed_transfer(Request $request, string $cases_id)
     {
-        //
+        try {
+            $token = explode(' ', $request->header('Authorization'))[1];
+            $accessToken = PersonalAccessToken::findToken($token);
+            $user = $accessToken->tokenable;
+
+            $data = $request->validate([
+                'from_bed' => 'required|numeric', // old bed id
+                'bed' => 'required|numeric', // new bed id
+                'allocation_id' => 'required|numeric', // from bed_allocation id
+                'exited_at' => 'nullable', // time of changing.
+            ]);
+            $checkBed = Beds::where('id', $data['bed'])->first();
+            if($checkBed->is_booked == 1){
+                return response()->json(['data'=> "already booked by other", 'msg' => 'error', 'status' => 400]);
+            }
+            // from bed
+            BedAllocation::where('id', $request->allocation_id)->update([
+                'exited_at'=> $request->input('exited_at') ?? now(),
+                'discharged_from_bed'=> 0, // 0 because bed is changing
+                'updated_at' => now(),
+            ]);
+            BedAllocation::insert([
+                'cases_id' => $cases_id,
+                'current_bed'=> $request->input('bed'),
+                'from_bed'=> $request->input('bed'),
+                'discharged_from_bed'=> null,
+                'entered_at'=> $request->input('exited_at') ?? now(),
+                'exited_at'=> null,
+                'allocated_by'=> $user->id,
+                'created_at'=> now(),
+                'updated_at'=> now(),
+            ]);
+
+            Beds::where('id',  $data['bed'])->update([
+                'is_booked'=> 1
+            ]);
+
+            Beds::where('id',  $data['from_bed'])->update([
+                'is_booked'=> 0
+            ]);
+            return response()->json(['data'=> "changed", 'msg' => 'success', 'status' => 200]);
+        }catch (ValidationException $e){
+            return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
+        }
+    }
+    public function mysqlDate($dateValue)
+    {
+        return Carbon::parse($dateValue)->format('Y-m-d H:i:s');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function saveServiceBillingData(Request $request, string $cases_id)
     {
-        //
+        try {
+            $token = explode(' ', $request->header('Authorization'))[1];
+            $accessToken = PersonalAccessToken::findToken($token);
+            $user = $accessToken->tokenable;
+
+            $services = $request->input('services');
+            $sanitizeServices = [];
+            foreach ($services as $service) {
+                $storage = [];
+//                $storage['name'] = gettype($service['service']);
+                if(gettype($service['service']) == 'string') {
+                    $storage['service'] = $service['service'];
+                    $storage['price'] = $service['price'];
+                }else{
+                    $storage['id'] = $service['service']['id'];
+                    $storage['service'] = $service['service']['name'];
+                    $storage['price'] = $service['service']['amount'];
+                }
+                $storage['user_id'] = $service['user_id'];
+                $storage['qty'] = $service['qty'];
+                $storage['total'] = $service['total'];
+                $storage['date'] = $service['date'];
+                $storage['status'] = true; // this mean next time non-editable.
+                $sanitizeServices[] = $storage;
+            }
+            $sanitizeServices = json_encode($sanitizeServices);
+            IndoorBillings::updateOrInsert(
+            ['cases_id' => $cases_id, 'patient_id' => $request->input('patient_id')], fn ($exists) => $exists ? [
+                'services'=> $sanitizeServices,
+                'payable' => 0,
+                'received_by' => $user->id,
+                'created_at'=> now(),
+                'updated_at'=> now(),
+            ]:
+            [
+                'services'=> $sanitizeServices,
+                'payable' => 0,
+                'received_by' => $user->id,
+                'created_at'=> now(),
+                'updated_at'=> now(),
+                'received' => 0
+            ]);
+            return response()->json(['data'=> "saved", 'msg' => 'success', 'status' => 200]);
+        }catch (ValidationException $e){
+            return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function generate_bill(Request $request, string $cases_id)
     {
-        //
+        try{
+//            $user =
+        }catch (ValidationException $e){
+
+        }
     }
 }

@@ -12,7 +12,7 @@ class RequisitionController extends Controller
     public function index()
     {
         $requisitions = Requisition::with(['case.patient', 'case.bed.room', 'case.department','billing.patient', 'requisite_by'])
-            ->orderBy('status', 'desc')
+            ->orderBy('created_at', 'desc')
             ->whereNotIn('status', [-1])->get();
         return response()->json([
             'data'   => $requisitions,
@@ -92,6 +92,21 @@ class RequisitionController extends Controller
             }
 
         } catch (ValidationException $e) {
+            return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
+        }
+    }
+
+    public function updateStatus(Request $request){
+        try {
+            $validation = $request->validate([
+                'requisitionId' => 'required|integer',
+                'status' => 'required|integer',
+            ]);
+            $update = Requisition::where('id', $request->input('requisitionId'))->update([
+                'status' => $request->input('status'),
+            ]);
+            return response()->json(['data' => $request->all(), 'msg' => 'success', 'status' => 200]);
+        }catch (ValidationException $e){
             return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
         }
     }

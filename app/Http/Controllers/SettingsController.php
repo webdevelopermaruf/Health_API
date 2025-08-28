@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Models\GeneralSettings;
+use App\Models\Role;
 use Buglinjo\LaravelWebp\Facades\Webp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +26,7 @@ class SettingsController extends Controller
             $settings->permissions =  json_decode($user->permission);
             $settings->username = $user['name'];
             $settings->code = $user['code'];
+            $settings->role = Role::where('id', $user['roles_id'])->value('name');
         }
 
         return response()->json([

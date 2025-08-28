@@ -22,7 +22,7 @@ class PharmacyMedicineImport implements ToModel, WithHeadingRow
             'generic_name'  => $row['generic'] ?? '',
             'strength'          => $row['strength'],
             'shelf'         => null,
-            'pharmacy_supplier_id' => 1 ?? null,
+            'pharmacy_supplier_id' => $row['supplier'] ?? null,
             'factory_price' =>0,
             'sales_price'   => 0,
             'qty'           => 0,

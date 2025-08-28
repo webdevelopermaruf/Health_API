@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GeneralSettings;
+use App\Models\OutTransaction;
 use App\Models\Patient;
 use App\Models\PharmacyBilling;
 use App\Models\BillingTransactions;
@@ -10,6 +11,7 @@ use App\Models\PharmacyMedicines;
 use App\Models\PharmacyPurchases;
 use App\Models\Requisition;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -30,10 +32,20 @@ class PharmacyBillingController extends Controller
     }
     public function getPurchases()
     {
+        $purchases = PharmacyPurchases::with(['supplier','transactions.paid_by'])
+            ->orderBy('created_at', 'desc')
+            ->whereNotIn('status', [-1])->get();
+        $purchases->each(function ($purchase) {
+            $purchase->transactions->each(function ($transaction) {
+                if ($transaction->type === 2) {
+                    // Manually load the relationship for this specific transaction
+                    $transaction->load('paid_to');
+                }
+            });
+        });
+
         return response()->json([
-            'data'=> PharmacyPurchases::with(['supplier'])
-                ->orderBy('created_at', 'desc')
-                ->whereNotIn('status', [-1])->get(),
+            'data'=>$purchases,
             'msg' => 'success',
             'status'=> 200
         ]);
@@ -194,7 +206,12 @@ class PharmacyBillingController extends Controller
                 $total_qty += $medicine['qty'];
             }
 
-            $purchase = PharmacyPurchases::create([
+            $token = explode(' ', $request->header('Authorization'))[1];
+            $accessToken = PersonalAccessToken::findToken($token);
+            $user = $accessToken->tokenable;
+
+
+            $purchase = PharmacyPurchases::insertGetId([
                 'pharmacy_supplier_id' => $request->input('pharmacy_supplier_id'),
                 'medicines' => json_encode($request->input('medicines')),
                 'total_qty' => $total_qty,
@@ -204,9 +221,21 @@ class PharmacyBillingController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+            OutTransaction::insert([
+                'trx_id' => $purchase, // foreign id purchase id / expense id
+                'description' => 'Pharmacy Purchase',
+                'type' => 2, // pharmacy purchase id === 2
+                'amount' => $request->input('paid'), // purchase paid amount.
+                'paid_to' => $request->input('pharmacy_supplier_id'),
+                'payment_methods_id'=> $request->input('payment_method') ?? 1,
+                'user_id'=> $user->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
             // Prepare medicines for attachment to the pivot table
             $medicineData = [];
+            $purchase = PharmacyPurchases::where('id',  $purchase)->first();
             foreach ($request->input('medicines') as $medicine) {
                 $medicineData[$medicine['id']] = [
                     'qty' => $medicine['qty'],
@@ -258,6 +287,11 @@ class PharmacyBillingController extends Controller
     public function duePayPurchase(Request $request, string $id)
     {
         try {
+
+            $token = explode(' ', $request->header('Authorization'))[1];
+            $accessToken = PersonalAccessToken::findToken($token);
+            $user = $accessToken->tokenable;
+
             $validatedData = $request->validate([
                 'paying'=> 'required|numeric',
                 'status'=> 'required|integer',
@@ -267,6 +301,18 @@ class PharmacyBillingController extends Controller
             $data->status =  $validatedData['status'];
             $data->updated_at = now();
             $data->save();
+
+            OutTransaction::insert([
+                'trx_id' => $id, // foreign id purchase id / expense id
+                'description' => 'Pharmacy Purchase',
+                'type' => 2, // pharmacy purchase id === 2
+                'amount' => $validatedData['paying'], // purchase paid amount.
+                'paid_to' => $data->pharmacy_supplier_id,
+                'payment_methods_id'=> $data->payment_methods_id ?? 1,
+                'user_id'=> $user->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
             return response()->json(['data' => $request->all(), 'msg' => 'success', 'status' => 200]);
         }catch (ValidationException  $e){

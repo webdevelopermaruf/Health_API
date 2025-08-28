@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('blood')->nullable();
             $table->string('picture')->nullable();
             $table->tinyInteger('gender')->default(0);
+            $table->foreignId('roles_id')->nullable();
             $table->tinyInteger('status')->default(1);
             $table->json('permission')->nullable();
             $table->rememberToken();

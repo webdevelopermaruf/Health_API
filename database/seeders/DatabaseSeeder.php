@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Auth;
 use App\Models\GeneralSettings;
 use App\Models\PaymentMethods;
+use App\Models\Role;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Faker\Factory as Faker;
@@ -33,6 +34,40 @@ class DatabaseSeeder extends Seeder
             'permission' => null, // JSON permissions
         ]);
 
+        Role::insert([
+            [
+                'id' => 1,
+                'name' => 'admin',
+            ],
+            [
+                'id' => 2,
+                'name' => 'accountant',
+            ],
+            [
+                'id' => 3,
+                'name' => 'receptionist',
+            ],
+            [
+                'id' => 4,
+                'name' => 'doctor',
+            ],
+            [
+                'id' => 5,
+                'name' => 'nurse',
+            ],
+            [
+                'id' => 6,
+                'name' => 'pharmacy',
+            ],
+            [
+                'id' => 7,
+                'name' => 'laboratorist',
+            ],
+            [
+                'id' => 8,
+                'name' => 'report-delivery',
+            ]
+        ]);
         $faker = Faker::create();
         GeneralSettings::insert([
             "user_code" => "PHS",
@@ -40,13 +75,12 @@ class DatabaseSeeder extends Seeder
             "address" => json_encode(["en"=> "Bishwa Road, Subhanighat, Sylhet-3100", "bn"=> "বিশ্বরোড, সুবহানীঘাট, সিলেট-৩১০০", "hotline"=>"+8801714820333"], JSON_UNESCAPED_UNICODE),
             "icon" => json_encode(["icon"=> "/images/logo.jpg"], JSON_UNESCAPED_UNICODE),
             "sms_api" => json_encode(["balance"=> 0, "rate"=> 0.35, "apikey"=> "8XYpeBwf0JMssLw3Cyxf"]),
-            "attendance" => json_encode(["area_code"=>"BRC","area_id"=> 2, "server"=>"http://localhost:9090",
-                "username"=>"BRC_College","password"=>"3S1afTdU9cZdT"]),
+            "attendance" => json_encode([]),
             "sms_rules" => json_encode([]),
             "payroll_rules" => json_encode([]),
         ]);
 
-        // departments
+        // other seeder calling
         $this->call([
             FeatureSeeder::class,
             DepartmentSeeder::class,

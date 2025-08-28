@@ -17,8 +17,8 @@ return new class extends Migration
         Schema::create('bed_allocations', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Cases::class);
-            $table->foreignIdFor(Beds::class, 'current_bed');
-            $table->foreignIdFor(Beds::class, 'from_bed')->nullable();
+            $table->foreignIdFor(Beds::class, 'current_bed'); // now bed
+            $table->foreignIdFor(Beds::class, 'from_bed')->nullable(); // previous bed
             $table->tinyInteger('discharged_from_bed')->default(1)->nullable(); // if discharged from this bed then 1
             $table->timestamp('entered_at');
             $table->timestamp('exited_at')->nullable();

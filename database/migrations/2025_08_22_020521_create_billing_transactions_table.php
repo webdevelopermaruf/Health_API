@@ -19,12 +19,12 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Patient::class);
             $table->foreignIdFor(Cases::class)->nullable();
-            $table->tinyInteger('trx_type')->default(1);
+            $table->tinyInteger('trx_type')->default(1);  // 0 = refund 1 = payment
             $table->decimal('amount', 10,2)->default(1);
-            $table->tinyInteger('billing_type')->default(1);
-            $table->integer('billing_id');
+            $table->tinyInteger('billing_type')->default(1);  // 1 = hospital billing counter, 2 = pharmacy counter
+            $table->integer('billing_id'); // billing id
             $table->foreignIdFor(PaymentMethods::class)->default(1);
-            $table->foreignIdFor(User::class)->default(1);
+            $table->foreignIdFor(User::class)->default(1); // generated_by
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });

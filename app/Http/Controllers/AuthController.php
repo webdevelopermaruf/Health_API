@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Features;
 use App\Models\GeneralSettings;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
@@ -16,7 +16,7 @@ class AuthController extends Controller
     public function login(Request $request){
 
         if($request->input('email')) {
-            $user = \App\Models\Auth::where('email', $request->input('email'))->first();
+            $user = User::where('email', $request->input('email'))->first();
             Auth::loginUsingId($user->id);
         }else{
             $request->validate([
@@ -52,18 +52,6 @@ class AuthController extends Controller
             $token = $user->createToken('auth')->plainTextToken;
             $user->token = $token;
             $settings = GeneralSettings::findOrFail(1);
-//            $response = Http::post(json_decode($settings->attendance)->server . '/jwt-api-token-auth/', [
-//                "username" => json_decode($settings->attendance)->username,
-//                "password" => json_decode($settings->attendance)->password,
-//            ]);
-//            if ($response->successful()) {
-//                $user->attendance = $response->json();
-//                $newAttendance = json_decode($settings->attendance);
-//                $newAttendance->remember = $response->json()['token'];
-//                GeneralSettings::where('id', 1)->update(['attendance'=> json_encode($newAttendance)]);
-//            }else {
-//                $user->attendance = "Something went wrong";
-//            }
             return response()->json(['data'=> $user, 'msg' => 'success' , 'status'=> 200])->cookie('access_token', $token, 60, null, null, true, true);
         }
         catch (\Exception $e){

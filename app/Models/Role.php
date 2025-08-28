@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class IndoorBillings extends Model
+class Role extends Model
 {
-    public $table = 'indoor_billings';
+    //
 }

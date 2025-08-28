@@ -25,10 +25,13 @@ class Cases extends Model
     }
 
     public function bed(){
-        return $this->hasOneThrough(Beds::class, BedAllocation::class, 'cases_id', 'id', 'id', 'current_bed');
+        return $this->hasOneThrough(Beds::class, BedAllocation::class, 'cases_id', 'id', 'id', 'current_bed')->whereNull('bed_allocations.exited_at');
     }
 
     public function requisitions(){
         return $this->hasMany(Requisition::class, 'cases_id');
+    }
+    public function allocations(){
+        return $this->hasMany(BedAllocation::class, 'cases_id', 'id');
     }
 }

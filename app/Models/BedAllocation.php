@@ -16,4 +16,9 @@ class BedAllocation extends Model
         return $this->belongsTo(Beds::class, 'current_bed', 'id');
     }
 
+    public function allocator()
+    {
+        return $this->belongsTo(User::class, 'allocated_by', 'id');
+    }
+
 }

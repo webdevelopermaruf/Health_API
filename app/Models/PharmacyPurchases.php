@@ -31,4 +31,9 @@ class PharmacyPurchases extends Model
     {
         return $this->belongsTo(PharmacySupplier::class, 'pharmacy_supplier_id');
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(OutTransaction::class, 'trx_id')->where('type', 2);
+    }
 }

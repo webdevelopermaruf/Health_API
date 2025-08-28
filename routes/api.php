@@ -149,14 +149,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/request/requisition', [RequisitionController::class, 'store']);
     Route::post('/edit/requisition/{id}', [RequisitionController::class, 'update']);
     Route::post('/delete/requisition/{id}', [RequisitionController::class, 'destroy']);
+    Route::post('/requisite/pharmacy/update-status', [RequisitionController::class, 'updateStatus']);
 
 
     Route::get('/medicine/units', [PharmacyMedicinesController::class, 'units']);
     Route::get('/search/medicine/{search}', [PharmacyMedicinesController::class, 'search']);
     Route::post('/indoor/admission', [IndoorController::class, 'store']);
+    Route::post('/transfer/bed/{cases_id}', [IndoorController::class, 'bed_transfer']);
     Route::get('/indoor/patients', [PatientController::class, 'index']);
     Route::get('/indoor/cases', [IndoorController::class, 'cases']);
     Route::post('/indoor/billing', [IndoorController::class, 'indoorBillingData']);
+    Route::post('/indoor/billing/save/services/{cases_id}', [IndoorController::class, 'saveServiceBillingData']);
+    Route::post('/indoor/generate/bill/{cases_id}', [IndoorController::class, 'generate_bill']);
 
     Route::post('/update/app', [SettingsController::class, 'update']);
 });
