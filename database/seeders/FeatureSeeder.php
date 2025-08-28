@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 class FeatureSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * can't modify previous features id; but add new id;
      */
     public function run(): void
     {

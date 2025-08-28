@@ -16,102 +16,69 @@ class StaffSeeder extends Seeder
     public function run()
     {
         // Generate the next code for staff (assuming no existing staff)
-        $last_code = DB::table('users')->where('code', 'like', 'ST-%')->max('code');
-        $next_number = $last_code ? (int) str_replace('ST-', '', $last_code) + 1 : 1000;
+        $last_code = DB::table('users')->where('code', 'like', 'EMP-%')->max('code');
+        $next_number = $last_code ? (int) str_replace('EMP-', '', $last_code) + 1 : 1000;
 
-        // Define two staff members with corresponding users
-        $staffs = [
-            [
-                'user' => [
-                    'code' => 'EMP-' . $next_number,
-                    'name' => 'Mr Accountant',
-                    'email' => 'sarah.davis@example.com',
-                    'phone' => '202-555-0789',
-                    'password' => Hash::make('accounts'),
-                    'designation' => 'Registered Nurse',
-                    'department_id' => 6, // Emergency Medicine (from DepartmentSeeder)
-                    'address' => '789 Care Street, City, Country',
-                    'dob' => '1990-11-05',
-                    'blood' => 'B+',
-                    'picture' => "/users/default.png",
-                    'gender' => 2, // Female
-                    'status' => 1,
-                    'permission' => null,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-                'staff' => [
-                    'department_id' => 6, // Emergency Medicine
-                    'salary_structure_id' => 1, // Nurse Salary
-                    'status' => 1,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-            ],
-            [
-                'user' => [
-                    'code' => 'EMP-' . ($next_number + 1),
-                    'name' => 'Mr Receptionist',
-                    'email' => 'michael.brown@example.com',
-                    'phone' => '202-555-0987',
-                    'password' => Hash::make('reception'),
-                    'designation' => 'Receptionist',
-                    'department_id' => 6, // Emergency Medicine
-                    'address' => '101 Welcome Road, City, Country',
-                    'dob' => '1985-07-12',
-                    'blood' => 'B+',
-                    'picture' => "/users/default.png",
-                    'gender' => 0, // Male
-                    'status' => 1,
-                    'permission' => null,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-                'staff' => [
-                    'department_id' => 6, // Emergency Medicine
-                    'salary_structure_id' => 2, // Receptionist Salary
-                    'status' => 1,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-            ],
-            [
-                'user' => [
-                    'code' => 'EMP-' . ($next_number + 2),
-                    'name' => 'Mr Lab',
-                    'email' => 'lab.brown@example.com',
-                    'phone' => '202-555-0687',
-                    'password' => Hash::make('lab'),
-                    'designation' => 'Laboratorist',
-                    'department_id' => 6, // Emergency Medicine
-                    'address' => '101 Welcome Road, City, Country',
-                    'dob' => '1985-07-12',
-                    'blood' => 'O-',
-                    'picture' => "/users/default.png",
-                    'gender' => 1, // Male
-                    'status' => 1,
-                    'permission' => null,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-                'staff' => [
-                    'department_id' => 6, // Emergency Medicine
-                    'salary_structure_id' => 2, // Salary
-                    'status' => 1,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-            ],
+        $designations = [
+            ['Registered Nurse', 4, 10],      // Nurse
+            ['Accountant', 5, 7],             // Accountant
+            ['HR & IT Officer', 6, 6],        // IT Administrator
+            ['Receptionist', 4, 9],           // Receptionist
+            ['Laboratorist', 7, 12],          // Laboratorist
+            ['Lab Assistant', 7, 13],         // Reports Delivery (or create new role if needed)
+            ['Pharmacist', 8, 11],            // Pharmacist
+            ['Physiotherapist', 9, 14],        // Doctor (if same dashboard), or create a role for Physiotherapist
+            ['Technician', 9, 14],             // Doctor (if no specific role), or create role
+            ['Ward Clerk', 4, 10],            // Nurse (or create a dedicated Ward Clerk role)
         ];
 
-        // Insert users and staff
-        foreach ($staffs as $record) {
+        foreach ($designations as $index => $item) {
+            // Extract designation info
+            $designation = $item[0];
+            $departmentId = $item[1];
+            $roleId = $item[2];
+
+            // Fetch basic_access from roles table
+            $permission = DB::table('roles')->where('id', $roleId)->value('basic_access');
+
+            // Prepare user data
+            $userData = [
+                'code' => 'EMP-' . ($next_number + $index),
+                'name' => $designation, // can customize name if needed
+                'email' => strtolower(str_replace(' ', '.', $designation)) . '@phs.com',
+                'phone' => '012345' . rand(10000, 99999),
+                'password' => Hash::make('iamstaff'),
+                'designation' => $designation,
+                'department_id' => $departmentId,
+                'address' => 'Subhanighat, Sylhet',
+                'dob' => '1990-01-01', // placeholder
+                'blood' => 'O+', // placeholder
+                'picture' => "/users/default.png",
+                'gender' => rand(0,1), // 0: Male, 1: Female
+                'status' => 1,
+                'roles_id' => $roleId,
+                'permission' => $permission, // from roles.basic_access
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
             // Insert user and get ID
-            $userId = DB::table('users')->insertGetId($record['user']);
-            // Insert staff with user_id, department_id, and salary_structure_id
-            DB::table('staffs')->insert(array_merge($record['staff'], [
+            $userId = DB::table('users')->insertGetId($userData);
+
+            // Prepare staff data
+            $staffData = [
+                'department_id' => $departmentId,
+                'salary_structure_id' => $index + 1, // increment by 1
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
                 'user_id' => $userId,
-            ]));
+            ];
+
+            // Insert staff
+            DB::table('staffs')->insert($staffData);
         }
+
+
     }
 }

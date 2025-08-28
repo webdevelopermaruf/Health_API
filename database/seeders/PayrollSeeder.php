@@ -18,49 +18,37 @@ class PayrollSeeder extends Seeder
         for ($i = 0; $i < count($paymentMethods); $i++) {
             PaymentMethods::insert([
                 "name" => $paymentMethods[$i],
-                "type" => $paymentMethods[$i] == "Cash"? 1 : 2,
+                "type" => $paymentMethods[$i] == "Cash" ? 1 : 2,
                 "details" => "Account Number: ". rand(10000000, 999999999),
                 "created_at" => now(),
                 "updated_at" => now(),
             ]);
         }
-        SalaryStructure::insert([
-                "designation" => "Staff",
-                "basic_salary" => 0,
+        $designations = [
+            'Registered Nurse',
+            'Accountant',
+            'HR & IT Officer',
+            'Receptionist',
+            'Laboratorist',
+            'Lab Assistant',
+            'Pharmacist',
+            'Physiotherapist',
+            'Technician',
+            'Ward Clerk',
+        ];
+        foreach ($designations as $designation) {
+            SalaryStructure::insert([
+                "designation" => $designation,
+                "basic_salary" => rand(20, 50) * 1000,
                 "salary_type" => 1, // monthly
-                "overtime_rate" => 0,
+                "overtime_rate" => rand(1, 5) * 100,
                 "overtime_type" => 4, // hourly
                 "allowances" => json_encode([]),
                 "deductions" => json_encode([]),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-
-//        $designations = [
-//            'Registered Nurse',
-//            'Receptionist',
-//            'Lab Assistant',
-//            'Pharmacist',
-//            'Accountant',
-//            'HR Officer',
-//            'Ward Clerk',
-//            'Physiotherapist',
-//            'Technician',
-//        ];
-//        for ($i = 0; $i < 5; $i++) {
-//            $designation = $designations[array_rand($designations)]; //
-//            SalaryStructure::insert([
-//                "designation" => $designation,
-//                "basic_salary" => rand(20, 50) * 1000,
-//                "salary_type" => rand(1, 5),
-//                "overtime_rate" => rand(1, 5) * 1000,
-//                "overtime_type" => rand(1, 5),
-//                "allowances" => json_encode([]),
-//                "deductions" => json_encode([]),
-//                'created_at' => now(),
-//                'updated_at' => now(),
-//            ]);
-//        }
+        }
 
     }
 }

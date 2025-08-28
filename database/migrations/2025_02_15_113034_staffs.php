@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->foreignId('department_id');
-            $table->foreignId('salary_structure_id');
+            $table->foreignId('salary_structure_id')->nullable();
             $table->string('qualification')->nullable();
             $table->string('experience')->nullable();
             $table->string('about')->nullable();
