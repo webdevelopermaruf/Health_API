@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Billing;
+use App\Models\Cases;
 use App\Models\Patient;
 use App\Models\Services;
 use App\Models\User;
@@ -21,6 +22,8 @@ return new class extends Migration
             $table->foreignIdFor(Billing::class);
             $table->foreignIdFor(Patient::class);
             $table->foreignIdFor(Services::class);
+            $table->foreignIdFor(Cases::class)->nullable();
+            $table->tinyInteger('billing_type')->default(2); // 1 for indoor 2 for outdoor
             $table->text('report')->nullable();
             $table->foreignIdFor(User::class)->nullable();
             $table->tinyInteger('status')->default(1);

@@ -7,8 +7,10 @@ use App\Models\Beds;
 use App\Models\BillingTransactions;
 use App\Models\Cases;
 use App\Models\IndoorBillings;
+use App\Models\LabReport;
 use App\Models\Patient;
 use App\Models\PharmacyBilling;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -132,8 +134,8 @@ class IndoorController extends Controller
             $case_id = [];
             if($data['cases_id']){
                 $case_id = $request->input('cases_id');
-                $get_data = Cases::with('patient.cases.patient')->where('id', $data['cases_id'])->first();
-                $output['patient'] = $get_data['patient']['cases']['patient'];
+                $get_data = Cases::with('patient')->where('id', $data['cases_id'])->first();
+                $output['patient'] = $get_data['patient'];
                 $output['cases'] = $get_data;
             }else if($data['bed']){
                  $get_data = Beds::with('bed.cases.patient')->where('id', $data['bed'])->first();
@@ -149,7 +151,7 @@ class IndoorController extends Controller
             }
             // fetch pharmacy bills
             $output['pharmacy'] = PharmacyBilling::where('cases_id', $case_id)->get();
-            $output['transaction']= BillingTransactions::where('cases_id', $case_id)->get();
+            $output['transactions']= BillingTransactions::with('user')->where('cases_id', $case_id)->get();
             $output['bed_bills'] = BedAllocation::with('beds', 'allocator')->where('cases_id', $case_id)->get();
             $output['services'] = IndoorBillings::where('cases_id', $case_id)->first();
 
@@ -226,17 +228,22 @@ class IndoorController extends Controller
             $services = $request->input('services');
             $sanitizeServices = [];
             foreach ($services as $service) {
+
                 $storage = [];
-//                $storage['name'] = gettype($service['service']);
                 if(gettype($service['service']) == 'string') {
                     $storage['service'] = $service['service'];
                     $storage['price'] = $service['price'];
                 }else{
+
                     $storage['id'] = $service['service']['id'];
                     $storage['service'] = $service['service']['name'];
                     $storage['price'] = $service['service']['amount'];
                 }
-                $storage['user_id'] = $service['user_id'];
+                if($service['type']===3){
+                    $storage['lab'] = true;
+                }
+                $storage['type'] = $service['type'];
+                $storage['user'] = $service['user'];
                 $storage['qty'] = $service['qty'];
                 $storage['total'] = $service['total'];
                 $storage['date'] = $service['date'];
@@ -244,22 +251,40 @@ class IndoorController extends Controller
                 $sanitizeServices[] = $storage;
             }
             $sanitizeServices = json_encode($sanitizeServices);
-            IndoorBillings::updateOrInsert(
+            $billing = IndoorBillings::updateOrInsert(
             ['cases_id' => $cases_id, 'patient_id' => $request->input('patient_id')], fn ($exists) => $exists ? [
                 'services'=> $sanitizeServices,
                 'payable' => 0,
                 'received_by' => $user->id,
-                'created_at'=> now(),
                 'updated_at'=> now(),
             ]:
             [
                 'services'=> $sanitizeServices,
                 'payable' => 0,
+                'received' => 0,
                 'received_by' => $user->id,
                 'created_at'=> now(),
                 'updated_at'=> now(),
-                'received' => 0
             ]);
+
+            $billingId = IndoorBillings::where('cases_id', $cases_id)->where('patient_id', $request->input('patient_id'))->first()->id;
+            foreach ($services as $service) {
+               if ($service['type'] === 3 && !isset($service['lab'])) {
+                   LabReport::insert([
+                       'services_id' => $service['service']['id'],
+                       'cases_id'    => $cases_id,
+                       'patient_id'  => $request->input('patient_id'),
+                       'billing_id'  => $billingId,
+                       'billing_type'  => 1,
+                       'user_id'     => $user->id,
+                       'status'      => 0,
+                       'created_at'  => now(),
+                       'updated_at'  => now(),
+                   ]);
+               }
+            }
+
+
             return response()->json(['data'=> "saved", 'msg' => 'success', 'status' => 200]);
         }catch (ValidationException $e){
             return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
@@ -269,9 +294,101 @@ class IndoorController extends Controller
     public function generate_bill(Request $request, string $cases_id)
     {
         try{
-//            $user =
-        }catch (ValidationException $e){
+            $token = explode(' ', $request->header('Authorization'))[1];
+            $accessToken = PersonalAccessToken::findToken($token);
+            $user = $accessToken->tokenable;
 
+            $pharmacy_bill = PharmacyBilling::where('cases_id', $cases_id)->sum('payable');
+            $services_list = IndoorBillings::where('cases_id', $cases_id)->get();
+            $services_bill = 0;
+            foreach ($services_list as $billing) {
+                $services = json_decode($billing->services, true);
+                foreach ($services as $service) {
+                    $services_bill += floatval($service['total']); // sum the total
+                }
+            }
+            $beds_list = BedAllocation::with('beds')->where('cases_id', $cases_id)->get();
+            $bed_bill = 0;
+            foreach ($beds_list as $allocation) {
+                $bed = $allocation->beds;
+                if (!$bed) continue; // skip if no bed assigned
+                $entered_at = Carbon::parse($allocation->entered_at);
+                $exited_at = $allocation->exited_at ? Carbon::parse($allocation->exited_at) : Carbon::now();
+                $hours_spent = intval($entered_at->diffInHours($exited_at));
+                $days_spent = intval($entered_at->diffInDays($exited_at));
+                $price = floatval($bed->price);
+
+                if ($bed->timeline == 1) {
+                    // Hourly price
+                    $bed_bill += $hours_spent * $price;
+                } elseif ($bed->timeline == 2) {
+                    // Daily price
+                    $bed_bill += ($days_spent == 0 ? 1 : $days_spent) * $price;
+                    $remaining_hours = $hours_spent - ($days_spent * 24);
+                    if ($remaining_hours > 0) {
+                        $bed_bill += $price;
+                    }
+                }
+            }
+
+            IndoorBillings::where('cases_id', $cases_id)->update([
+                'total' => $services_bill,
+                'pharmacy_bill' => $pharmacy_bill,
+                'bed_bill' => $bed_bill,
+                'payable' => ($bed_bill+$services_bill+$pharmacy_bill),
+                'updated_at'=> now(),
+                'received_by'=>  $user->id,
+            ]);
+
+            return response()->json(['data'=> "generated", 'msg' => 'success', 'status' => 200]);
+        }catch (ValidationException $e){
+            return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
         }
+    }
+    public function receive_bill(Request $request, string $cases_id)
+    {
+        try{
+            $validatedData = $request->validate([
+                'amount' => 'required|numeric',
+            ]);
+            $token = explode(' ', $request->header('Authorization'))[1];
+            $accessToken = PersonalAccessToken::findToken($token);
+            $user = $accessToken->tokenable;
+
+            $billing = IndoorBillings::where('cases_id', $cases_id)->first();
+            $billing->increment('received', $request->input('amount'));
+            $billing->updated_at = now();
+            $billing->received_by = $user->id;
+            $billing->save();
+
+            BillingTransactions::insert([
+                'patient_id'=> $billing->patient_id,
+                'cases_id'=> $cases_id,
+                'trx_type'=> 1, // payment
+                'amount'=> $request->input('amount'),
+                'billing_type'=> 1, // hospital counter
+                'billing_id'=> $billing->id,
+                'user_id'=> $user->id,
+                'status'=> 1,
+                'created_at'=> now(),
+                'updated_at'=> now(),
+            ]);
+
+            return response()->json(['data'=> "received", 'msg' => 'success', 'status' => 200]);
+        }catch (ValidationException $e){
+            return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
+        }
+    }
+    public function getIndoorBilling(Request $request) {
+        $billings=  IndoorBillings::with(['cases','patient', 'user'])->where('status', 0)->get(); // pending bills
+        foreach ($billings as $billing) {
+            $services_bill = 0;
+            $services = json_decode($billing->services, true);
+            foreach ($services as $service) {
+                $services_bill += floatval($service['total']); // sum the total
+            }
+            $billing->total_service_bill = number_format($services_bill, 2,'.','');
+        }
+        return response()->json(['data' => $billings, 'msg' => 'success', 'status' => 200]);
     }
 }

@@ -19,8 +19,9 @@ class LabReport extends Model
     }
     public function billing()
     {
-        return $this->belongsTo(Billing::class, 'billing_id');
+        return $this->morphTo('billing', 'billing_type', 'billing_id');
     }
+
     public function service()
     {
         return $this->belongsTo(Services::class, 'services_id');

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Billing;
+use App\Models\IndoorBillings;
 use App\Models\LabReport;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -17,24 +19,14 @@ class LabReportController extends Controller
      */
     public function index()
     {
-        return response()->json([
-            'data'=> LabReport::whereNotIn('status', [-1])
-                ->with(['patient','billing', 'service'])
-                ->get(),
-            'msg' => 'success',
-            'status'=> 200
-        ]);
+        $labReports = LabReport::whereNotIn('status', [-1])->get();
+        return $this->extracted($labReports);
     }
 
     public function delivery()
     {
-        return response()->json([
-            'data'=> LabReport::where('status', 2) // published
-                ->with(['patient','billing', 'service'])
-                ->get(),
-            'msg' => 'success',
-            'status'=> 200
-        ]);
+        $labReports = LabReport::where('status', 2)->get();
+        return $this->extracted($labReports);
     }
 
 
@@ -89,5 +81,23 @@ class LabReportController extends Controller
         }catch (ValidationException  $e) {
             return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
         }
+    }
+
+    public function extracted($labReports): \Illuminate\Http\JsonResponse
+    {
+        $labReports->load(['patient', 'service']);
+        $labReports->each(function ($report) {
+            if ($report->billing_type == 1) {
+                $report->setRelation('billing', IndoorBillings::find($report->billing_id));
+            } else {
+                $report->setRelation('billing', Billing::find($report->billing_id));
+            }
+        });
+
+        return response()->json([
+            'data' => $labReports,
+            'msg' => 'success',
+            'status' => 200
+        ]);
     }
 }

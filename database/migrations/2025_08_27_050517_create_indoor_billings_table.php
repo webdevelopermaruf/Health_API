@@ -25,8 +25,9 @@ return new class extends Migration
             $table->tinyInteger('discount_type')->nullable();
             $table->decimal('discount', 10,2)->nullable();
             $table->decimal('VAT', 10,2)->comment('percent')->nullable();
-            $table->decimal('payable', 10,2); // bill
+            $table->decimal('payable', 10,2); // total bill
             $table->decimal('received', 10,2); // money paid
+            $table->foreignIdFor(User::class, 'discounted_by')->nullable(); // discounted by
             $table->tinyInteger('status')->default(0);
             $table->foreignIdFor(User::class,'received_by');
             $table->timestamps();

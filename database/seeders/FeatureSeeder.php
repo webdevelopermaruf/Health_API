@@ -8,73 +8,73 @@ use Illuminate\Database\Seeder;
 class FeatureSeeder extends Seeder
 {
     /**
-     * can't modify previous features id; but add new id;
+     * Can't modify previous features id; but add new id;
      */
     public function run(): void
     {
         $parents = [
-                [
-                    'id' => 1,
-                    'name' => 'App', // settings, users (access control), department
-                    'path' => '/app',
-                    'status' => 1,
-                ],
-                [
-                    'id' => 2,
-                    'name' => 'HR Manager', // Doctors, Staffs, Recruitment (Job Post, Applicants)
-                    'path' => '/hr',
-                    'status' => 1,
-                ],
-                [
-                    'id' => 3,
-                    'name' => 'Scheduler Manager',
-                    'path' => '/scheduler',
-                    'status' => 1,
-                ],
-                [
-                    'id' => 4,
-                    'name' => 'Service Manager',
-                    'path' => '/service-manager',
-                    'status' => 1,
-                ],
-                [
-                    'id' => 5,
-                    'name' => 'Accounting Manager',
-                    'path' => '/accounting',
-                    'status' => 1,
-                ],
-                [
-                    'id' => 6,
-                    'name' => 'Billing Manager',
-                    'path' => '/billing',
-                    'status' => 1,
-                ],
-                [
-                    'id' => 7,
-                    'name' => 'Lab & Diagnostics',
-                    'path' => '/lab-diagnostics',
-                    'status' => 1,
-                ],
-                [
-                    'id' => 8,
-                    'name' => 'Pharmacy',
-                    'path' => '/pharmacy',
-                    'status' => 1,
-                ],
-                [
-                    'id' => 9,
-                    'name' => 'Indoor Manager',
-                    'path' => '/indoor-manager',
-                    'status' => 1,
-                ],
-                [
-                    'id' => 10,
-                    'name' => 'Website Manager',
-                    'path' => '/website-manager',
-                    'status' => 1,
-                ],
+            [
+                'id' => 1,
+                'name' => 'App', // settings, users (access control), department
+                'path' => '/app',
+                'status' => 1,
+            ],
+            [
+                'id' => 2,
+                'name' => 'HR Manager', // Doctors, Staffs, Recruitment (Job Post, Applicants)
+                'path' => '/hr',
+                'status' => 1,
+            ],
+            [
+                'id' => 3,
+                'name' => 'Scheduler Manager',
+                'path' => '/scheduler',
+                'status' => 1,
+            ],
+            [
+                'id' => 4,
+                'name' => 'Service Manager',
+                'path' => '/service-manager',
+                'status' => 1,
+            ],
+            [
+                'id' => 5,
+                'name' => 'Accounting Manager',
+                'path' => '/accounting',
+                'status' => 1,
+            ],
+            [
+                'id' => 6,
+                'name' => 'Billing Manager',
+                'path' => '/billing',
+                'status' => 1,
+            ],
+            [
+                'id' => 7,
+                'name' => 'Lab & Diagnostics',
+                'path' => '/lab-diagnostics',
+                'status' => 1,
+            ],
+            [
+                'id' => 8,
+                'name' => 'Pharmacy',
+                'path' => '/pharmacy',
+                'status' => 1,
+            ],
+            [
+                'id' => 9,
+                'name' => 'Indoor Manager',
+                'path' => '/indoor-manager',
+                'status' => 1,
+            ],
+            [
+                'id' => 10,
+                'name' => 'Website Manager',
+                'path' => '/website-manager',
+                'status' => 1,
+            ],
+        ];
 
-            ];
         $children = [
             [
                 'id' => 1001,
@@ -196,20 +196,64 @@ class FeatureSeeder extends Seeder
                 'status' => 1,
             ],
 
-            // billing,
+            // accounts
             [
-            'id' => 6001,
-            'name' => 'Outdoor Billing',
-            'path' => '/billing/outdoor',
-            'parent' => 6,
-            'status' => 1,
+                'id' => 5001,
+                'name' => 'Income & Payable Management',
+                'path' => '/accounts/income-payable',
+                'parent' => 5,
+                'status' => 1,
             ],
             [
-            'id' => 6002,
-            'name' => 'Indoor Billing',
-            'path' => '/billing/indoor',
-            'parent' => 6,
-            'status' => 1,
+                'id' => 5002,
+                'name' => 'Purchase & Expenditure Management',
+                'path' => '/accounts/expenditure',
+                'parent' => 5,
+                'status' => 1,
+            ],
+            [
+                'id' => 5003,
+                'name' => 'Assets & Liability Management',
+                'path' => '/accounts/assets-liability',
+                'parent' => 5,
+                'status' => 1,
+            ],
+            [
+                'id' => 5004,
+                'name' => 'Accounting & Transactions',
+                'path' => '/accounts/accounting-transactions',
+                'parent' => 5,
+                'status' => 1,
+            ],
+            [
+                'id' => 5005,
+                'name' => 'Report & Statement Management',
+                'path' => '/accounts/reports-statements',
+                'parent' => 5,
+                'status' => 1,
+            ],
+            [
+                'id' => 5006,
+                'name' => 'Discount & Coupons Management',
+                'path' => '/accounts/discount',
+                'parent' => 5,
+                'status' => 1,
+            ],
+
+            // billing
+            [
+                'id' => 6001,
+                'name' => 'Outdoor Billing',
+                'path' => '/billing/outdoor',
+                'parent' => 6,
+                'status' => 1,
+            ],
+            [
+                'id' => 6002,
+                'name' => 'Indoor Billing',
+                'path' => '/billing/indoor',
+                'parent' => 6,
+                'status' => 1,
             ],
 
             // lab reports

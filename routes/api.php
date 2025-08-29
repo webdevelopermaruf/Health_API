@@ -158,9 +158,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/transfer/bed/{cases_id}', [IndoorController::class, 'bed_transfer']);
     Route::get('/indoor/patients', [PatientController::class, 'index']);
     Route::get('/indoor/cases', [IndoorController::class, 'cases']);
+    Route::get('/indoor/pending-billing', [IndoorController::class, 'getIndoorBilling']);
     Route::post('/indoor/billing', [IndoorController::class, 'indoorBillingData']);
     Route::post('/indoor/billing/save/services/{cases_id}', [IndoorController::class, 'saveServiceBillingData']);
     Route::post('/indoor/generate/bill/{cases_id}', [IndoorController::class, 'generate_bill']);
+    Route::post('/indoor/receive/bill/{cases_id}', [IndoorController::class, 'receive_bill']);
 
     Route::post('/update/app', [SettingsController::class, 'update']);
 });
