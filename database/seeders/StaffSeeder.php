@@ -17,7 +17,7 @@ class StaffSeeder extends Seeder
     {
         // Generate the next code for staff (assuming no existing staff)
         $last_code = DB::table('users')->where('code', 'like', 'EMP-%')->max('code');
-        $next_number = $last_code ? (int) str_replace('EMP-', '', $last_code) + 1 : 1000;
+        $next_number = $last_code ? (int) str_replace('EMP', '', $last_code) + 1 : 1000;
 
         $designations = [
             ['Registered Nurse', 4, 10],      // Nurse
@@ -43,7 +43,7 @@ class StaffSeeder extends Seeder
 
             // Prepare user data
             $userData = [
-                'code' => 'EMP-' . ($next_number + $index),
+                'code' => 'EMP' . ($next_number + $index),
                 'name' => $designation, // can customize name if needed
                 'email' => strtolower(str_replace(' ', '.', $designation)) . '@phs.com',
                 'phone' => '012345' . rand(10000, 99999),

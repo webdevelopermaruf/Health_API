@@ -26,4 +26,11 @@ class LabReport extends Model
     {
         return $this->belongsTo(Services::class, 'services_id');
     }
+
+    public function prepared_by()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+
 }

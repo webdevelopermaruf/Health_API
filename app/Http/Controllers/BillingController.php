@@ -130,7 +130,7 @@ class BillingController extends Controller
                        'patient_id' => $patientId,
                        'services_id' => $service['id'],
                        'status' => 0,
-                       'user_id' => $user->id,
+                       'user_id' => null, // prepared_by
                        'created_at' => now(),
                        'updated_at' => now(),
                    ];

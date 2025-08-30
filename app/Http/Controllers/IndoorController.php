@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BedAllocation;
 use App\Models\Beds;
 use App\Models\BillingTransactions;
+use App\Models\CaseRecords;
 use App\Models\Cases;
 use App\Models\IndoorBillings;
 use App\Models\LabReport;
@@ -33,6 +34,40 @@ class IndoorController extends Controller
             'data'=> $cases,
             'msg' => 'success',
             'status'=> 200
+        ]);
+    }
+
+    public function show(string $cases_id)
+    {
+        $case = Cases::with(['patient', 'department', 'prepared', 'doctor.user', 'requisitions', 'referred', 'bed.room',
+            'allocations.beds.room', 'allocations.allocator', 'billing', 'lab_reports.prepared_by', 'lab_reports.service', 'case_record'])->where('id', $cases_id)->first();
+        if ($case) {
+            $case->current_allocation = collect($case->allocations)
+                ->whereNull('exited_at')
+                ->first()?->id;
+            // Handle billing->services JSON
+            if ($case->billing && !empty($case->billing->services)) {
+                $services = json_decode($case->billing->services, true);
+                if (is_array($services)) {
+                    // Collect all user_ids to reduce queries
+                    $userIds = collect($services)->pluck('user_id')->filter()->unique()->toArray();
+                    $users = \App\Models\User::whereIn('id', $userIds)
+                        ->get(['id', 'name', 'code'])
+                        ->keyBy('id');
+                    foreach ($services as &$service) {
+                        if (isset($service['user_id']) && isset($users[$service['user_id']])) {
+                            $service['user'] = $users[$service['user_id']]->name. ' - '. $users[$service['user_id']]->code;
+                        }
+                    }
+                    // overwrite services with enriched array
+                    $case->billing->services = $services;
+                }
+            }
+        }
+        return response()->json([
+            'data'   => $case,
+            'msg'    => 'success',
+            'status' => 200
         ]);
     }
 
@@ -119,9 +154,6 @@ class IndoorController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function indoorBillingData(Request $request)
     {
         try {
@@ -130,7 +162,6 @@ class IndoorController extends Controller
                 'bed' =>  'nullable',
                 'phone' =>  'nullable',
             ]);
-//            $output = ;
             $case_id = [];
             if($data['cases_id']){
                 $case_id = $request->input('cases_id');
@@ -163,9 +194,6 @@ class IndoorController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function bed_transfer(Request $request, string $cases_id)
     {
         try {
@@ -276,7 +304,7 @@ class IndoorController extends Controller
                        'patient_id'  => $request->input('patient_id'),
                        'billing_id'  => $billingId,
                        'billing_type'  => 1,
-                       'user_id'     => $user->id,
+                       'user_id'     => null,
                        'status'      => 0,
                        'created_at'  => now(),
                        'updated_at'  => now(),
@@ -336,8 +364,8 @@ class IndoorController extends Controller
                 'pharmacy_bill' => $pharmacy_bill,
                 'bed_bill' => $bed_bill,
                 'payable' => ($bed_bill+$services_bill+$pharmacy_bill),
-                'updated_at'=> now(),
                 'received_by'=>  $user->id,
+                'updated_at'=> now(),
             ]);
 
             return response()->json(['data'=> "generated", 'msg' => 'success', 'status' => 200]);
@@ -390,5 +418,121 @@ class IndoorController extends Controller
             $billing->total_service_bill = number_format($services_bill, 2,'.','');
         }
         return response()->json(['data' => $billings, 'msg' => 'success', 'status' => 200]);
+    }
+    public function approvedDiscount(Request $request, string $cases_id) {
+        try {
+            $validatedData = $request->validate([
+                'amount' => 'required|numeric',
+                'type' => 'required|numeric',
+            ]);
+            $token = explode(' ', $request->header('Authorization'))[1];
+            $accessToken = PersonalAccessToken::findToken($token);
+            $user = $accessToken->tokenable;
+
+            if($user->roles_id === 1 || $user->roles_id === 2){
+                $check = IndoorBillings::where('status', 0)->where('cases_id', $cases_id)->first();
+                if($check){
+                    $update = IndoorBillings::where('cases_id', $cases_id)->update([
+                        'discount' =>  $request->input('amount'),
+                        'discounted_by' => $user->id,
+                        'discount_type' => $request->input('type'),
+                    ]);
+                    return response()->json(['data'=> "approved", 'msg' => 'success', 'status' => 200]);
+                }else{
+                    return response()->json(['data'=> "wrong", 'msg' => 'error', 'status' => 400]);
+                }
+
+            }else{
+                return response()->json(['data'=> "wrong", 'msg' => 'error', 'status' => 400]);
+            }
+        }catch (ValidationException $e){
+            return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
+        }
+    }
+
+    public function saveCaseRecords(Request $request, string $cases_id) {
+        try{
+            $validatedData = $request->validate([
+                'dischargeDate' => 'required|date',
+                'dischargeType' => 'required|string',
+                'diagnosis' => 'required|string',
+                'allergyHistory' => 'required|string',
+                'complaints' => 'required|string',
+                'pastHistory' => 'required|string',
+                'findings' => 'required|string',
+                'investigation' => 'required|string',
+                'hospitalCourse' => 'required|string',
+                'medicationsDuringStay' => 'required|string',
+                'diet' => 'required|string',
+                'dischargeMedications' => 'required|string',
+                'advice' => 'required|string',
+                'followUp' => 'required|string',
+                'urgentCareInstructions' => 'required|string',
+                'particulars' => 'nullable|string',
+                'seniorHouseOfficer' => 'required|string',
+                'specialist' => 'required|string',
+                'consultant' => 'required|string',
+            ]);
+            $token = explode(' ', $request->header('Authorization'))[1];
+            $accessToken = PersonalAccessToken::findToken($token);
+            $user = $accessToken->tokenable;
+
+            $case_record = [
+                ...$validatedData,
+                "user_id"=> $user->id,
+                "cases_id"=> $cases_id,
+                "updated_at"=> now(),
+                "created_at"=> now(),
+            ];
+            CaseRecords::updateOrInsert(['cases_id' => $cases_id], $case_record);
+            return response()->json(['data' => $case_record, 'msg' => 'success', 'status' => 200]);
+
+        }catch (ValidationException $e){
+            return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
+        }
+    }
+    public function updateAdmissionReason(Request $request, string $cases_id) {
+        try{
+            $validatedData = $request->validate([
+                'dischargeDate' => 'required|date',
+                'dischargeType' => 'required|string',
+                'diagnosis' => 'required|string',
+                'allergyHistory' => 'required|string',
+                'complaints' => 'required|string',
+                'pastHistory' => 'required|string',
+                'findings' => 'required|string',
+                'investigation' => 'required|string',
+                'hospitalCourse' => 'required|string',
+                'medicationsDuringStay' => 'required|string',
+                'diet' => 'required|string',
+                'dischargeMedications' => 'required|string',
+                'advice' => 'required|string',
+                'followUp' => 'required|string',
+                'urgentCareInstructions' => 'required|string',
+                'particulars' => 'nullable|string',
+                'name' => 'required|string',
+                'empId' => 'required|string',
+                'dateTime' => 'required|date',
+                'seniorHouseOfficer' => 'required|string',
+                'specialist' => 'required|string',
+                'consultant' => 'required|string',
+            ]);
+            $token = explode(' ', $request->header('Authorization'))[1];
+            $accessToken = PersonalAccessToken::findToken($token);
+            $user = $accessToken->tokenable;
+
+            $case_record = [
+                ...$validatedData,
+                "user_id"=> $user->id,
+                "cases_id"=> $cases_id,
+                "updated_at"=> now(),
+                "created_at"=> now(),
+            ];
+            CaseRecords::updateOrInsert(['cases_id' => $cases_id], $case_record);
+            return response()->json(['data' => $case_record, 'msg' => 'success', 'status' => 200]);
+
+        }catch (ValidationException $e){
+            return response()->json(['data' => $e->errors(), 'msg' => 'error', 'status' => 422]);
+        }
     }
 }

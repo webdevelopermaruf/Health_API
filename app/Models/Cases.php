@@ -23,6 +23,9 @@ class Cases extends Model
     public function referred(){
         return $this->belongsTo(User::class, 'referred_by');
     }
+    public function billing(){
+        return $this->belongsTo(IndoorBillings::class, 'id', 'cases_id');
+    }
 
     public function bed(){
         return $this->hasOneThrough(Beds::class, BedAllocation::class, 'cases_id', 'id', 'id', 'current_bed')->whereNull('bed_allocations.exited_at');
@@ -33,5 +36,11 @@ class Cases extends Model
     }
     public function allocations(){
         return $this->hasMany(BedAllocation::class, 'cases_id', 'id');
+    }
+    public function lab_reports(){
+        return $this->hasMany(LabReport::class, 'cases_id', 'id');
+    }
+    public function case_record(){
+        return $this->hasOne(CaseRecords::class, 'cases_id', 'id');
     }
 }

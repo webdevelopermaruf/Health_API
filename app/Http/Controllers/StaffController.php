@@ -65,12 +65,12 @@ class StaffController extends Controller
                 'status' => 'required',
             ]);
 
-            $last_code = User::where('code', 'like', 'EMP-%')->max('code');
-            $next_number = $last_code ? (int) str_replace('EMP-', '', $last_code) + 1 : date('y') . '0001';
-            $hasUploadedPicture = $this->isHasUploadedPicture('EMP-'.$next_number, $request);
+            $last_code = User::where('code', 'like', 'EMP%')->max('code');
+            $next_number = $last_code ? (int) str_replace('EMP', '', $last_code) + 1 : date('y') . '0001';
+            $hasUploadedPicture = $this->isHasUploadedPicture('EMP'.$next_number, $request);
 
             $user = User::insertGetId([
-                'code' => 'EMP-' . $next_number,
+                'code' => 'EMP' . $next_number,
                 'name' => ucwords($request->name),
                 'email' => strtolower($request->email),
                 'phone' => $request->phone,
@@ -81,7 +81,7 @@ class StaffController extends Controller
                 'dob' => $request->dob,
                 'blood' => $request->blood,
                 'gender' => $request->gender,
-                'picture' => $hasUploadedPicture? "/users/EMP-" . $next_number . "/picture.webp": "/users/default.png",
+                'picture' => $hasUploadedPicture? "/users/EMP" . $next_number . "/picture.webp": "/users/default.png",
                 'status' => $request->status ?? 1,
                 'updated_at' => now(),
                 'created_at' => now(),

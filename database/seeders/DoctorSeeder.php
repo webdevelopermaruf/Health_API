@@ -16,15 +16,15 @@ class DoctorSeeder extends Seeder
     public function run()
     {
         // Generate the next code (assuming no existing doctors)
-        $last_code = DB::table('users')->where('code', 'like', 'DR-%')->max('code');
-        $next_number = $last_code ? (int) str_replace('DR-', '', $last_code) + 1 : 1000;
+        $last_code = DB::table('users')->where('code', 'like', 'DR%')->max('code');
+        $next_number = $last_code ? (int) str_replace('DR', '', $last_code) + 1 : 1000;
         $permission = DB::table('roles')->where('id', 8)->value('basic_access');
 
         // Define two doctors with corresponding users
         $doctors = [
             [
                 'user' => [
-                    'code' => 'DR-' . $next_number,
+                    'code' => 'DR' . $next_number,
                     'name' => 'Dr. X',
                     'email' => 'drx@phs.com',
                     'phone' => '012345' . rand(10000, 99999),

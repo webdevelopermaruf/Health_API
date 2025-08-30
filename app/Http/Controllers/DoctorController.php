@@ -63,12 +63,12 @@ class DoctorController extends Controller
                 'status' => 'required',
             ]);
 
-            $last_code = User::where('code', 'like', 'DR-%')->max('code');
-            $next_number = $last_code ? (int) str_replace('DR-', '', $last_code) + 1 : date('y') . '0001';
-            $hasUploadedPicture = $this->isHasUploadedPicture("DR-".$next_number, $request);
+            $last_code = User::where('code', 'like', 'DR%')->max('code');
+            $next_number = $last_code ? (int) str_replace('DR', '', $last_code) + 1 : date('y') . '0001';
+            $hasUploadedPicture = $this->isHasUploadedPicture("DR".$next_number, $request);
 
             $user = User::insertGetId([
-                'code' => 'DR-' . $next_number,
+                'code' => 'DR' . $next_number,
                 'name' => ucwords($request->name),
                 'email' => strtolower($request->email),
                 'phone' => $request->phone,
@@ -79,7 +79,7 @@ class DoctorController extends Controller
                 'dob' => $request->dob,
                 'blood' => $request->blood,
                 'gender' => $request->gender,
-                'picture' => $hasUploadedPicture? "/users/DR-" . $next_number . "/picture.webp" : "/users/default.png",
+                'picture' => $hasUploadedPicture? "/users/DR" . $next_number . "/picture.webp" : "/users/default.png",
                 'status' => $request->status ?? 1,
                 'updated_at' => now(),
                 'created_at' => now(),
