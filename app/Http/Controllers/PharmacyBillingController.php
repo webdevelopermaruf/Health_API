@@ -186,7 +186,7 @@ class PharmacyBillingController extends Controller
     public function showPharmacy($billId)
     {
         $settings = GeneralSettings::first();
-        $data = PharmacyBilling::with(['patient'])->where('id', $billId)->first();
+        $data = PharmacyBilling::with(['patient','user'])->where('id', $billId)->first();
         if($data){
             return view('print.pharmacy_billing', ['data'=>$data, 'settings'=> $settings]);
         }

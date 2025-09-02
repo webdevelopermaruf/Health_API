@@ -133,7 +133,7 @@ class DatabaseSeeder extends Seeder
             "user_code" => "PHS",
             "name" => json_encode(["en"=> "Prime Hospital", "bn"=> "প্রাইম হসপিটাল"], JSON_UNESCAPED_UNICODE),
             "address" => json_encode(["en"=> "Bishwa Road, Subhanighat, Sylhet-3100", "bn"=> "বিশ্বরোড, সুবহানীঘাট, সিলেট-৩১০০", "hotline"=>"+8801714820333"], JSON_UNESCAPED_UNICODE),
-            "icon" => json_encode(["icon"=> "/images/logo.jpg"], JSON_UNESCAPED_UNICODE),
+            "icon" => json_encode(["icon"=> "images/logo.jpg"], JSON_UNESCAPED_UNICODE),
             "sms_api" => json_encode(["balance"=> 0, "rate"=> 0.35, "apikey"=> "8XYpeBwf0JMssLw3Cyxf"]),
             "attendance" => json_encode([]),
             "sms_rules" => json_encode([]),

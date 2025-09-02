@@ -27,7 +27,7 @@ class BillingController extends Controller
     public function show($billId)
     {
         $settings = GeneralSettings::first();
-        $data = Billing::with(['patient' ,'appointment.doctor.user.department'])->where('id', $billId)->first();
+        $data = Billing::with(['patient' ,'appointment.doctor.user.department', 'user'])->where('id', $billId)->first();
         if($data){
             return view('print.billing', ['data'=>$data, 'settings'=> $settings]);
         }

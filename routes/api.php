@@ -4,6 +4,7 @@ use App\Http\Controllers\AppointmentScheduleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BedController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\IndoorController;
@@ -165,11 +166,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/indoor/generate/bill/{cases_id}', [IndoorController::class, 'generate_bill']);
     Route::post('/indoor/receive/bill/{cases_id}', [IndoorController::class, 'receive_bill']);
     Route::post('/indoor/approved/discount/{cases_id}', [IndoorController::class, 'approvedDiscount']);
-
-
-
     Route::post('/update/admission-reason//{cases_id}', [IndoorController::class, 'updateAdmissionReason']);
     Route::post('/save/case-records/{cases_id}', [IndoorController::class, 'saveCaseRecords']);
+
+
+
+
+    // Dashboard Route
+    Route::get('/today/doctors-appointment', [DashboardController::class, 'todayDoctorsAppointment']);
+    Route::get('/today/reception-statistics', [DashboardController::class, 'receptionStatistics']);
+
 
     Route::post('/update/app', [SettingsController::class, 'update']);
 });
@@ -177,5 +183,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::get('/app', [SettingsController::class, 'index']);
 Route::get('/billing/{billId}', [BillingController::class, 'show']);
 Route::get('/billing/pharmacy/{billId}', [PharmacyBillingController::class, 'showPharmacy']);
+Route::get('/billing/indoor/{billId}', [IndoorController::class, 'showBilling']);
 Route::get('/login', [AuthController::class, 'index'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);

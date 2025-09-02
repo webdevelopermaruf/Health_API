@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Document</title>
+    <title>Pharmacy Billing</title>
+    <script src="https://unpkg.com/jsbarcode@latest/dist/JsBarcode.all.min.js"></script>
     <style>
         *{
             margin:0;
@@ -30,24 +31,34 @@
             font-weight: bold;
         }
         .paidBox{
-            font-size: 20px;border:2px solid; padding:5px 5px 2px 5px;
-            transform: rotate(-20deg); margin-left: 50px;
+            font-size: 20px;
+            border:2px solid;
+            padding:5px 5px 2px 5px;
+            transform: rotate(-20deg);
+            margin-left: 25px;
+            margin-top:30px;
+            margin-bottom:60px;
         }
 
     </style>
 </head>
-{{--<body onload="window.print()">--}}
-<body>
+<body onload="window.print()">
 <div class="receipt">
     @php
     $subtotal=0
     @endphp
     <header style="text-align: center">
-        <img style="width:80px;" src="{{json_decode($settings->icon)->icon}}" alt="">
+        <img style="width:80px;" src="/storage/{{json_decode($settings->icon)->icon}}" alt="">
         <h2 class="center">{{json_decode($settings->name)->en}}</h2>
         <p class="center">{{json_decode($settings->address)->en}} <br>
             Hotline: {{json_decode($settings->address)->hotline}} </p>
     </header>
+    <section style="display: flex; justify-content: space-between;align-items: center">
+        <p><b>Pharmacy Invoice Number: </b>{{$data->id}}</p>
+        <p>
+            <svg id="barcode"></svg>
+        </p>
+    </section>
     <hr style="margin:3px 0" />
     <section style="display: flex; justify-content: space-between">
         <p><b>Date: </b>{{date_format($data->updated_at, 'd-m-Y')}}</p>
@@ -111,6 +122,11 @@
                     DUE
                 @endif
             </h6>
+            <div  style="width: 100%;text-align: center">
+                <i>{{$data->user->name}}</i>
+                <hr>
+                <strong>Received By</strong>
+            </div>
         </div>
         <table>
             <tbody>
@@ -155,7 +171,18 @@
             </tbody>
         </table>
     </section>
+    <section style="text-align: center;margin-top:15px;">
+        <p>This is a system-generated receipt. <br>
+            Thank you for choosing Prime Hospital.</p>
+    </section>
 </div>
-
+<script>
+    JsBarcode("#barcode", "{{$data->id}}", {
+        lineColor: "#000",
+        width: 1.2,
+        height: 15,
+        displayValue: false
+    });
+</script>
 </body>
 </html>

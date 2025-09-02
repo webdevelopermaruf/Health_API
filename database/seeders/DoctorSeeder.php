@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AppointmentSchedule;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -66,5 +67,21 @@ class DoctorSeeder extends Seeder
                 'department_id' => $record['user']['department_id'],
             ]));
         }
+        $schedules = [
+            "sun"   => ["14:00-21:00"], // 2:00 pm - 9:00 pm
+            "tue"  => ["14:00-21:00"],
+            "thu" => ["14:00-21:00"],
+            "fri"   => ["14:00-21:00"]
+        ];
+        // insert schedules
+        AppointmentSchedule::insert([
+            "doctors_id" => 1,
+            "rooms_id" => 1,
+            "fee" => 500,
+            "schedule" => json_encode($schedules),
+            "appointment_date" =>null,
+            "created_at" => now(),
+            "updated_at" => now(),
+        ]);
     }
 }

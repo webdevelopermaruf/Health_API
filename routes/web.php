@@ -9,41 +9,31 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Maatwebsite\Excel\Facades\Excel;
 
+
+Route::get('/', function () {
+    return redirect()->away(env("FRONT_APP_URL", "http://localhost:3000"));
+});
 Route::get('/get-report/{invoice}/{mobile_number}', [BillingController::class, 'report']);
 Route::get('/storage', function () {
     Artisan::call('storage:link');
 });
 
-Route::get('/', function () {
-    return "Hello World";
-});
-
-//Route::get('/refresh-database', function () {
-//    Artisan::call('migrate:refresh --seed');
+//Route::get('/importer', function () {
+//    return view('index');
 //});
-
-Route::get('/cache', function () {
-    \Illuminate\Support\Facades\Cache::put('pharmacy_medicines',
-        PharmacyMedicines::with('supplier')->whereNotIn('status', [-1])->get(), 3600);
-});
-Route::get('/importer', function () {
-    return view('index');
-});
-
-Route::post('/import/medicine', function(Request $request)
-{
-    $request->validate([
-        'file' => 'required|mimes:xlsx,xls,csv'
-    ]);
-    Excel::import(new PharmacyMedicineImport, $request->file('file'));
-    return back()->with('success', 'Medicines imported successfully!');
-});
-
-Route::post('/import/supplier', function(Request $request)
-{
-    $request->validate([
-        'file' => 'required|mimes:xlsx,xls,csv'
-    ]);
-    Excel::import(new PharmacySupplierImport, $request->file('file'));
-    return back()->with('success', 'Medicines imported successfully!');
-});
+//Route::post('/import/medicine', function(Request $request)
+//{
+//    $request->validate([
+//        'file' => 'required|mimes:xlsx,xls,csv'
+//    ]);
+//    Excel::import(new PharmacyMedicineImport, $request->file('file'));
+//    return back()->with('success', 'Medicines imported successfully!');
+//});
+//Route::post('/import/supplier', function(Request $request)
+//{
+//    $request->validate([
+//        'file' => 'required|mimes:xlsx,xls,csv'
+//    ]);
+//    Excel::import(new PharmacySupplierImport, $request->file('file'));
+//    return back()->with('success', 'Medicines imported successfully!');
+//});

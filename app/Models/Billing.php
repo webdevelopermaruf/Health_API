@@ -17,4 +17,8 @@ class Billing extends Model
     public function appointment(){
         return $this->belongsTo(Appointments::class, 'appointments_id', 'id');
     }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 }
