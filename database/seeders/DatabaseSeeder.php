@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             'address' => 'Sylhet',
             'dob' => '1990-01-01',
             'blood' => 'O+',
+            'picture' => "/users/default.png",
             'roles_id' => 1, // admin
             'gender' => 1,
             'status' => 1,

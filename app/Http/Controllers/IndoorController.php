@@ -469,9 +469,9 @@ class IndoorController extends Controller
                 'followUp' => 'required|string',
                 'urgentCareInstructions' => 'required|string',
                 'particulars' => 'nullable|string',
-                'seniorHouseOfficer' => 'required|string',
-                'specialist' => 'required|string',
-                'consultant' => 'required|string',
+                'seniorHouseOfficer' => 'required|integer',
+                'specialist' => 'required|integer',
+                'consultant' => 'required|integer',
             ]);
             $token = explode(' ', $request->header('Authorization'))[1];
             $accessToken = PersonalAccessToken::findToken($token);
@@ -479,7 +479,7 @@ class IndoorController extends Controller
 
             $case_record = [
                 ...$validatedData,
-                "user_id"=> $user->id,
+                "discharged_by"=> $user->id,
                 "cases_id"=> $cases_id,
                 "updated_at"=> now(),
                 "created_at"=> now(),

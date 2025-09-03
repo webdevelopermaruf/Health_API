@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\RequisitionEvent;
 use App\Models\Requisition;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -51,7 +52,7 @@ class RequisitionController extends Controller
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);
-
+            broadcast(new RequisitionEvent($insert));
             if ($insert) {
                 return response()->json(['data' => $request->all(), 'msg' => 'success', 'status' => 201]);
             } else {

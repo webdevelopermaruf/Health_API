@@ -32,10 +32,6 @@ return new class extends Migration
             $table->string('advice')->nullable();
             $table->string('followUp')->nullable();
             $table->string('urgentCareInstructions')->nullable();
-            $table->string('particulars')->nullable();
-            $table->string('name');
-            $table->string('empId');
-            $table->dateTime('dateTime');
             $table->string('seniorHouseOfficer');
             $table->string('specialist');
             $table->string('consultant');

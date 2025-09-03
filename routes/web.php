@@ -18,22 +18,22 @@ Route::get('/storage', function () {
     Artisan::call('storage:link');
 });
 
-//Route::get('/importer', function () {
-//    return view('index');
-//});
-//Route::post('/import/medicine', function(Request $request)
-//{
-//    $request->validate([
-//        'file' => 'required|mimes:xlsx,xls,csv'
-//    ]);
-//    Excel::import(new PharmacyMedicineImport, $request->file('file'));
-//    return back()->with('success', 'Medicines imported successfully!');
-//});
-//Route::post('/import/supplier', function(Request $request)
-//{
-//    $request->validate([
-//        'file' => 'required|mimes:xlsx,xls,csv'
-//    ]);
-//    Excel::import(new PharmacySupplierImport, $request->file('file'));
-//    return back()->with('success', 'Medicines imported successfully!');
-//});
+Route::get('/importer', function () {
+    return view('index');
+});
+Route::post('/import/medicine', function(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls,csv'
+    ]);
+    Excel::import(new PharmacyMedicineImport, $request->file('file'));
+    return back()->with('success', 'Medicines imported successfully!');
+});
+Route::post('/import/supplier', function(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,xls,csv'
+    ]);
+    Excel::import(new PharmacySupplierImport, $request->file('file'));
+    return back()->with('success', 'Medicines imported successfully!');
+});
