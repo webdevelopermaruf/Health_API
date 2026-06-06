@@ -39,10 +39,13 @@ return [
                 'host' => env('REVERB_HOST', '127.0.0.1'),
                 'port' => env('REVERB_PORT', 6000),
                 'scheme' => env('REVERB_SCHEME', 'http'),
-                'useTLS' => env('REVERB_SCHEME', 'http') === 'https',
+                'useTLS' => false,
             ],
             'allowed_origins' => [
-                '*' // allow all origins for local development
+                'http://localhost:3000', // Your Vite dev server
+                'http://localhost:8000', // Your Laravel app
+                'http://127.0.0.1:3000', // Add IP version for safety
+                'http://127.0.0.1:8000',
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html

@@ -37,3 +37,8 @@ Route::post('/import/supplier', function(Request $request)
     Excel::import(new PharmacySupplierImport, $request->file('file'));
     return back()->with('success', 'Medicines imported successfully!');
 });
+
+Route::get('/broadcast-test/{msg}', function (string $msg) {
+    event(new \App\Events\RequisitionEvent(['message' => $msg]));
+    return 'ok';
+});

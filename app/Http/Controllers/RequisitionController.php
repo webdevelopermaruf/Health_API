@@ -52,7 +52,7 @@ class RequisitionController extends Controller
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);
-            broadcast(new RequisitionEvent($insert));
+            event(new RequisitionEvent(['msg'=> "WS Connected"]));
             if ($insert) {
                 return response()->json(['data' => $request->all(), 'msg' => 'success', 'status' => 201]);
             } else {

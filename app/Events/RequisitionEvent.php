@@ -4,8 +4,6 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -13,22 +11,23 @@ use Illuminate\Queue\SerializesModels;
 class RequisitionEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
-    public $data;
-    public function __construct($data)
-    {
-        $this->data = $data;
+    public array $payload;
+    public function __construct(public array $data) {
+        $this->payload = $data;
     }
 
-    public function broadcastOn(): array
+    public function broadcastOn(): Channel
     {
-        return [
-            new PrivateChannel('requisition-channel'),
-        ];
+        return new Channel('requisition-channel'); // PUBLIC channel
     }
 
     public function broadcastAs(): string
     {
-        return 'requisition-event';
+        return 'requisition-channel';
+    }
+
+    public function broadcastWith(): array
+    {
+        return $this->payload;
     }
 }
